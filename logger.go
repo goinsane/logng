@@ -5,8 +5,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"github.com/goinsane/erf"
 )
 
 // Logger provides a logger for leveled and structured logging.
@@ -79,7 +77,7 @@ func (l *Logger) out(severity Severity, message string, err error) {
 		if log.Time.IsZero() {
 			log.Time = time.Now()
 		}
-		log.StackCaller = NewStackTrace(erf.PC(1, 5)).Caller(0)
+		log.StackCaller = NewStackTrace(ProgramCounters(1, 5)).Caller(0)
 		if l.stackTraceSeverity >= severity {
 			log.StackTrace = NewStackTrace(ProgramCounters(64, 5))
 		}
@@ -101,7 +99,7 @@ func (l *Logger) log(severity Severity, args ...interface{}) {
 func (l *Logger) logf(severity Severity, format string, args ...interface{}) {
 	var err error
 	wErr := fmt.Errorf(format, args...)
-	if e, ok := wErr.(erf.WrappedError); ok {
+	if e, ok := wErr.(wrappedError); ok {
 		err = e.Unwrap()
 	}
 	l.out(severity, wErr.Error(), err)

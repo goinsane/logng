@@ -1,13 +1,7 @@
 package logng
 
 import (
-	"errors"
 	"strings"
-)
-
-var (
-	ErrInvalidSeverity = errors.New("invalid severity")
-	ErrUnknownSeverity = errors.New("unknown severity")
 )
 
 // Severity describes severity level of Log.
