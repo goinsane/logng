@@ -34,7 +34,7 @@ func NewLogger(output Output, severity Severity, verbose Verbose) *Logger {
 	}
 }
 
-// Clone duplicates the Logger.
+// Clone clones the Logger.
 func (l *Logger) Clone() *Logger {
 	if l == nil {
 		return nil
@@ -292,7 +292,7 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// V duplicates the Logger if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the Logger if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
 func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -305,7 +305,7 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 	return l2
 }
 
-// WithTime duplicates the Logger with given time.
+// WithTime clones the Logger with given time.
 func (l *Logger) WithTime(tm time.Time) *Logger {
 	if l == nil {
 		return nil
@@ -315,7 +315,7 @@ func (l *Logger) WithTime(tm time.Time) *Logger {
 	return l2
 }
 
-// WithFields duplicates the Logger with given fields.
+// WithFields clones the Logger with given fields.
 func (l *Logger) WithFields(fields ...Field) *Logger {
 	if l == nil {
 		return nil
@@ -325,7 +325,7 @@ func (l *Logger) WithFields(fields ...Field) *Logger {
 	return l2
 }
 
-// WithFieldKeyVals duplicates the Logger with given key and values of Field.
+// WithFieldKeyVals clones the Logger with given key and values of Field.
 func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -340,7 +340,7 @@ func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithFieldMap duplicates the Logger with given fieldMap.
+// WithFieldMap clones the Logger with given fieldMap.
 func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	if l == nil {
 		return nil

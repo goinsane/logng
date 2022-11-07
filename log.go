@@ -16,7 +16,7 @@ type Log struct {
 	StackTrace  *StackTrace
 }
 
-// Clone duplicates the Log.
+// Clone clones the Log.
 func (l *Log) Clone() *Log {
 	if l == nil {
 		return nil

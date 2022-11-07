@@ -7,7 +7,7 @@ import (
 )
 
 // StackCaller stores the information of stack caller.
-// StackCaller can format given information as string by using Format or String methods.
+// StackCaller can format given information as string by using String or Format methods.
 type StackCaller struct {
 	runtime.Frame
 }

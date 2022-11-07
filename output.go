@@ -25,7 +25,7 @@ func (m multiOutput) Log(log *Log) {
 	}
 }
 
-// MultiOutput creates an output that duplicates its logs to all the provided outputs.
+// MultiOutput creates an output that clones its logs to all the provided outputs.
 func MultiOutput(outputs ...Output) Output {
 	m := make(multiOutput, len(outputs))
 	copy(m, outputs)

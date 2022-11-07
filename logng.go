@@ -165,24 +165,29 @@ func SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return defaultLogger.SetStackTraceSeverity(stackTraceSeverity)
 }
 
-// V duplicates the default Logger if the default Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the default Logger if the default Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
 func V(verbosity Verbose) *Logger {
 	return defaultLogger.V(verbosity)
 }
 
-// WithTime duplicates the default Logger with given time.
+// WithTime clones the default Logger with given time.
 func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
 }
 
-// WithFields duplicates the default Logger with given fields.
+// WithFields clones the default Logger with given fields.
 func WithFields(fields ...Field) *Logger {
 	return defaultLogger.WithFields(fields...)
 }
 
-// WithFieldKeyVals duplicates the default Logger with given key and values of Field.
+// WithFieldKeyVals clones the default Logger with given key and values of Field.
 func WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return defaultLogger.WithFieldKeyVals(kvs...)
+}
+
+// WithFieldMap clones the default Logger with given fieldMap.
+func WithFieldMap(fieldMap map[string]interface{}) *Logger {
+	return defaultLogger.WithFieldMap(fieldMap)
 }
 
 var (
