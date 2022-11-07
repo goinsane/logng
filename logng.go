@@ -6,7 +6,7 @@ import (
 
 // ProgramCounters returns program counters by using runtime.Callers.
 func ProgramCounters(size, skip int) []uintptr {
-	pc := make([]uintptr, size)
-	pc = pc[:runtime.Callers(skip, pc)]
-	return pc
+	programCounter := make([]uintptr, size)
+	programCounter = programCounter[:runtime.Callers(skip, programCounter)]
+	return programCounter
 }
