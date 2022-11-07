@@ -22,8 +22,8 @@ func (c StackCaller) String() string {
 //
 // For '%s' (also '%v'):
 // 	%s       just show function and entry without padding and indent.
-// 	%+s      show file path, line and pc. padding char '\t', default padding 0, default indent 1.
-// 	% s      show file path, line and pc. padding char ' ', default padding 0, default indent 2.
+// 	%+s      show file path, line and program counter. padding char '\t', default padding 0, default indent 1.
+// 	% s      show file path, line and program counter. padding char ' ', default padding 0, default indent 2.
 // 	%+ s     exact with '% s'.
 // 	%#s      same with '%+s', use file name as file path.
 // 	%+#s     exact with '%#s'.
@@ -77,19 +77,19 @@ func (c StackCaller) Format(f fmt.State, verb rune) {
 
 // StackTrace stores the information of stack trace.
 type StackTrace struct {
-	pc      []uintptr
-	callers []StackCaller
+	programCounters []uintptr
+	callers         []StackCaller
 }
 
 // NewStackTrace creates a new StackTrace object.
-func NewStackTrace(pc ...uintptr) *StackTrace {
+func NewStackTrace(programCounters []uintptr) *StackTrace {
 	t := &StackTrace{
-		pc:      make([]uintptr, len(pc)),
-		callers: make([]StackCaller, 0, len(pc)),
+		programCounters: make([]uintptr, len(programCounters)),
+		callers:         make([]StackCaller, 0, len(programCounters)),
 	}
-	copy(t.pc, pc)
-	if len(t.pc) > 0 {
-		frames := runtime.CallersFrames(t.pc)
+	copy(t.programCounters, programCounters)
+	if len(t.programCounters) > 0 {
+		frames := runtime.CallersFrames(t.programCounters)
 		for {
 			frame, more := frames.Next()
 			caller := StackCaller{
@@ -110,10 +110,10 @@ func (t *StackTrace) Clone() *StackTrace {
 		return nil
 	}
 	t2 := &StackTrace{
-		pc:      make([]uintptr, len(t.pc), cap(t.pc)),
-		callers: make([]StackCaller, len(t.callers), cap(t.callers)),
+		programCounters: make([]uintptr, len(t.programCounters), cap(t.programCounters)),
+		callers:         make([]StackCaller, len(t.callers), cap(t.callers)),
 	}
-	copy(t2.pc, t.pc)
+	copy(t2.programCounters, t.programCounters)
 	copy(t2.callers, t.callers)
 	return t2
 }
@@ -150,22 +150,34 @@ func (t *StackTrace) Format(f fmt.State, verb rune) {
 	_, _ = f.Write(buf.Bytes())
 }
 
-// PC returns program counters.
-func (t *StackTrace) PC() []uintptr {
-	result := make([]uintptr, len(t.pc))
-	copy(result, t.pc)
+// ProgramCounters returns program counters.
+func (t *StackTrace) ProgramCounters() []uintptr {
+	result := make([]uintptr, len(t.programCounters))
+	copy(result, t.programCounters)
 	return result
 }
 
-// Caller returns a StackCaller on the given index. It panics if index is out of range.
+// SizeOfProgramCounters returns the size of program counters.
+func (t *StackTrace) SizeOfProgramCounters() int {
+	return len(t.programCounters)
+}
+
+// Callers returns callers.
+func (t *StackTrace) Callers(index int) []StackCaller {
+	result := make([]StackCaller, len(t.callers))
+	copy(result, t.callers)
+	return result
+}
+
+// SizeOfCallers returns the size of all callers.
+func (t *StackTrace) SizeOfCallers() int {
+	return len(t.callers)
+}
+
+// Caller returns a caller on the given index. It panics if index is out of range.
 func (t *StackTrace) Caller(index int) StackCaller {
 	if index < 0 || index >= len(t.callers) {
 		panic("index out of range")
 	}
 	return t.callers[index]
-}
-
-// Len returns the length of the length of all Caller's.
-func (t *StackTrace) Len() int {
-	return len(t.callers)
 }
