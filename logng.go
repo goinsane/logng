@@ -210,7 +210,7 @@ func SetTextOutputWriter(w io.Writer) *TextOutput {
 
 // SetTextOutputFlags sets the default TextOutput's flags.
 // It returns the default TextOutput.
-// By default, 0.
+// By default, TextOutputFlagDefault.
 func SetTextOutputFlags(flags TextOutputFlag) *TextOutput {
 	return defaultTextOutput.SetFlags(flags)
 }
