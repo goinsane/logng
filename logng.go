@@ -15,7 +15,7 @@ func ProgramCounters(size, skip int) []uintptr {
 	return programCounter
 }
 
-// Reset resets the default Logger and the default Output.
+// Reset resets the default Logger and the default TextOutput.
 func Reset() {
 	SetOutput(defaultTextOutput)
 	SetSeverity(SeverityInfo)
@@ -130,7 +130,7 @@ func Println(args ...interface{}) {
 
 // SetOutput sets the default Logger's output.
 // It returns the default Logger.
-// By default, the default Output.
+// By default, the default TextOutput.
 func SetOutput(output Output) *Logger {
 	return defaultLogger.SetOutput(output)
 }
@@ -196,20 +196,20 @@ var (
 	defaultTextOutputWriter = os.Stderr
 )
 
-// DefaultTextOutput returns the default Output as TextOutput type.
+// DefaultTextOutput returns the default TextOutput.
 func DefaultTextOutput() *TextOutput {
 	return defaultTextOutput
 }
 
-// SetTextOutputWriter sets the default Output's writer.
-// It returns the default Output as TextOutput type.
+// SetTextOutputWriter sets the default TextOutput's writer.
+// It returns the default TextOutput.
 // By default, os.Stderr.
 func SetTextOutputWriter(w io.Writer) *TextOutput {
 	return defaultTextOutput.SetWriter(w)
 }
 
-// SetTextOutputFlags sets the default Output's flags to override every single Log.Flags if the argument flags different from 0.
-// It returns the default Output as TextOutput type.
+// SetTextOutputFlags sets the default TextOutput's flags.
+// It returns the default TextOutput.
 // By default, 0.
 func SetTextOutputFlags(flags TextOutputFlag) *TextOutput {
 	return defaultTextOutput.SetFlags(flags)
