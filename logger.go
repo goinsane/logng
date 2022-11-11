@@ -17,6 +17,8 @@ type Logger struct {
 	stackTraceSeverity Severity
 	verbosity          Verbose
 	time               time.Time
+	prefix             string
+	suffix             string
 	fields             Fields
 }
 
@@ -49,6 +51,8 @@ func (l *Logger) Clone() *Logger {
 		stackTraceSeverity: l.stackTraceSeverity,
 		verbosity:          l.verbosity,
 		time:               l.time,
+		prefix:             l.prefix,
+		suffix:             l.suffix,
 		fields:             l.fields.Clone(),
 	}
 	return l2
@@ -61,7 +65,7 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	if l.output != nil && l.severity >= severity && l.verbose >= l.verbosity {
-		messageLen := len(message)
+		messageLen := len(l.prefix) + len(message) + len(l.suffix)
 		log := &Log{
 			Message:   make([]byte, 0, messageLen),
 			Error:     err,
@@ -70,7 +74,9 @@ func (l *Logger) out(severity Severity, message string, err error) {
 			Time:      l.time,
 			Fields:    l.fields.Clone(),
 		}
+		log.Message = append(log.Message, l.prefix...)
 		log.Message = append(log.Message, message...)
+		log.Message = append(log.Message, l.suffix...)
 		if messageLen != 0 && log.Message[messageLen-1] == '\n' {
 			log.Message = log.Message[:messageLen-1]
 		}
@@ -312,6 +318,46 @@ func (l *Logger) WithTime(tm time.Time) *Logger {
 	}
 	l2 := l.Clone()
 	l2.time = tm
+	return l2
+}
+
+// WithPrefix clones the Logger and adds the given prefix to end of the underlying prefix.
+func (l *Logger) WithPrefix(args ...interface{}) *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.prefix += fmt.Sprint(args...)
+	return l2
+}
+
+// WithPrefixf clones the Logger and adds the given prefix to end of the underlying prefix.
+func (l *Logger) WithPrefixf(format string, args ...interface{}) *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.prefix += fmt.Sprintf(format, args...)
+	return l2
+}
+
+// WithSuffix clones the Logger and adds the given suffix to start of the underlying suffix.
+func (l *Logger) WithSuffix(args ...interface{}) *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.suffix = fmt.Sprint(args...) + l2.suffix
+	return l2
+}
+
+// WithSuffixf clones the Logger and adds the given suffix to start of the underlying suffix.
+func (l *Logger) WithSuffixf(format string, args ...interface{}) *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.suffix = fmt.Sprintf(format, args...) + l2.suffix
 	return l2
 }
 
