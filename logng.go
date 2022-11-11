@@ -176,6 +176,26 @@ func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
 }
 
+// WithPrefix clones the default Logger and adds the given prefix to end of the underlying prefix.
+func WithPrefix(args ...interface{}) *Logger {
+	return defaultLogger.WithPrefix(args...)
+}
+
+// WithPrefixf clones the default Logger and adds the given prefix to end of the underlying prefix.
+func WithPrefixf(format string, args ...interface{}) *Logger {
+	return defaultLogger.WithPrefixf(format, args...)
+}
+
+// WithSuffix clones the default Logger and adds the given suffix to start of the underlying suffix.
+func WithSuffix(args ...interface{}) *Logger {
+	return defaultLogger.WithSuffix(args...)
+}
+
+// WithSuffixf clones the default Logger and adds the given suffix to start of the underlying suffix.
+func WithSuffixf(format string, args ...interface{}) *Logger {
+	return defaultLogger.WithSuffixf(format, args...)
+}
+
 // WithFields clones the default Logger with given fields.
 func WithFields(fields ...Field) *Logger {
 	return defaultLogger.WithFields(fields...)
