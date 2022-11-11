@@ -13,7 +13,7 @@ var (
 	testTime, _ = time.ParseInLocation("2006-01-02T15:04:05", "2010-11-12T13:14:15", time.Local)
 )
 
-// resetForTest resets xlog to run new test.
+// resetForTest resets logng to run new test.
 func resetForTest() {
 	logng.Reset()
 	logng.SetTextOutputFlags(logng.TextOutputFlagDefault & ^logng.TextOutputFlagDate & ^logng.TextOutputFlagTime & ^logng.TextOutputFlagStackTrace)
@@ -21,7 +21,7 @@ func resetForTest() {
 }
 
 func Example() {
-	// reset xlog for previous changes if it is running in go test.
+	// reset logng for previous changes if it is running in go test.
 	logng.Reset()
 	// change writer of default output to stdout from stderr.
 	logng.SetTextOutputWriter(os.Stdout)
@@ -66,12 +66,16 @@ func Example() {
 	// WithTime()
 	logng.WithTime(testTime).Info("this is info log with custom time.")
 
+	// WithPrefix()
+	logng.WithPrefix("prefix1").Warning("this is warning log with prefix 'prefix1'.")
+	logng.WithPrefix("prefix1").WithPrefix("prefix2").Error("this is error log with both of prefixes 'prefix1' and 'prefix2'.")
+
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
 }
 
 func Example_test1() {
-	// reset xlog for previous changes if it is running in go test.
+	// reset logng for previous changes if it is running in go test.
 	logng.Reset()
 	// just show severity.
 	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
@@ -162,6 +166,24 @@ func ExampleWithTime() {
 
 	// Output:
 	// 2010/11/12 13:14:15 INFO - this is info log, verbosity 0.
+}
+
+func ExampleWithPrefix() {
+	resetForTest()
+	logng.SetTextOutputFlags(0)
+	logng.WithPrefix("APP1: ").WithPrefix("APP2: ").Info("this is info log, verbosity 0.")
+
+	// Output:
+	// APP1: APP2: this is info log, verbosity 0.
+}
+
+func ExampleWithSuffix() {
+	resetForTest()
+	logng.SetTextOutputFlags(0)
+	logng.WithSuffix(" *").WithSuffix(" +").Info("this is info log, verbosity 0.")
+
+	// Output:
+	// this is info log, verbosity 0. + *
 }
 
 func ExampleLogger() {
@@ -259,6 +281,22 @@ func BenchmarkLogger_WithTime(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.WithTime(testTime)
+	}
+}
+
+func BenchmarkLogger_WithPrefix(b *testing.B) {
+	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.WithPrefix("prefix")
+	}
+}
+
+func BenchmarkLogger_WithPrefixf(b *testing.B) {
+	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.WithPrefixf("%s", "prefix")
 	}
 }
 
