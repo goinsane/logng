@@ -149,27 +149,27 @@ func NewTextOutput(w io.Writer, flags TextOutputFlag) *TextOutput {
 }
 
 // Log is implementation of Output.
-func (t *TextOutput) Log(log *Log) {
+func (o *TextOutput) Log(log *Log) {
 	var err error
 	defer func() {
-		if err == nil || t.onError == nil || *t.onError == nil {
+		if err == nil || o.onError == nil || *o.onError == nil {
 			return
 		}
-		(*t.onError)(err)
+		(*o.onError)(err)
 	}()
 
-	t.mu.Lock()
-	defer t.mu.Unlock()
+	o.mu.Lock()
+	defer o.mu.Unlock()
 
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
-	if t.flags&(TextOutputFlagDate|TextOutputFlagTime|TextOutputFlagMicroseconds) != 0 {
+	if o.flags&(TextOutputFlagDate|TextOutputFlagTime|TextOutputFlagMicroseconds) != 0 {
 		tm := log.Time.Local()
-		if t.flags&TextOutputFlagUTC != 0 {
+		if o.flags&TextOutputFlagUTC != 0 {
 			tm = tm.UTC()
 		}
 		b := make([]byte, 0, 128)
-		if t.flags&TextOutputFlagDate != 0 {
+		if o.flags&TextOutputFlagDate != 0 {
 			year, month, day := tm.Date()
 			itoa(&b, year, 4)
 			b = append(b, '/')
@@ -178,14 +178,14 @@ func (t *TextOutput) Log(log *Log) {
 			itoa(&b, day, 2)
 			b = append(b, ' ')
 		}
-		if t.flags&(TextOutputFlagTime|TextOutputFlagMicroseconds) != 0 {
+		if o.flags&(TextOutputFlagTime|TextOutputFlagMicroseconds) != 0 {
 			hour, min, sec := tm.Clock()
 			itoa(&b, hour, 2)
 			b = append(b, ':')
 			itoa(&b, min, 2)
 			b = append(b, ':')
 			itoa(&b, sec, 2)
-			if t.flags&TextOutputFlagMicroseconds != 0 {
+			if o.flags&TextOutputFlagMicroseconds != 0 {
 				b = append(b, '.')
 				itoa(&b, log.Time.Nanosecond()/1e3, 6)
 			}
@@ -194,22 +194,22 @@ func (t *TextOutput) Log(log *Log) {
 		buf.Write(b)
 	}
 
-	if t.flags&TextOutputFlagSeverity != 0 {
+	if o.flags&TextOutputFlagSeverity != 0 {
 		buf.WriteString(log.Severity.String())
 		buf.WriteString(" - ")
 	}
 
 	var padding []byte
-	if t.flags&TextOutputFlagPadding != 0 {
+	if o.flags&TextOutputFlagPadding != 0 {
 		padding = bytes.Repeat([]byte(" "), buf.Len())
 	}
 
-	if t.flags&(TextOutputFlagLongFunc|TextOutputFlagShortFunc) != 0 {
+	if o.flags&(TextOutputFlagLongFunc|TextOutputFlagShortFunc) != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
 			fn = trimSrcPath(log.StackCaller.Function)
 		}
-		if t.flags&TextOutputFlagShortFunc != 0 {
+		if o.flags&TextOutputFlagShortFunc != 0 {
 			fn = trimDirs(fn)
 		}
 		buf.WriteString(fn)
@@ -217,11 +217,11 @@ func (t *TextOutput) Log(log *Log) {
 		buf.WriteString(" - ")
 	}
 
-	if t.flags&(TextOutputFlagLongFile|TextOutputFlagShortFile) != 0 {
+	if o.flags&(TextOutputFlagLongFile|TextOutputFlagShortFile) != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
 			file = trimSrcPath(log.StackCaller.File)
-			if t.flags&TextOutputFlagShortFile != 0 {
+			if o.flags&TextOutputFlagShortFile != 0 {
 				file = trimDirs(file)
 			}
 		}
@@ -252,7 +252,7 @@ func (t *TextOutput) Log(log *Log) {
 		}
 	}
 
-	if t.flags&TextOutputFlagFields != 0 && len(log.Fields) > 0 {
+	if o.flags&TextOutputFlagFields != 0 && len(log.Fields) > 0 {
 		extend()
 		buf.WriteRune('\t')
 		buf.WriteString("+ ")
@@ -266,14 +266,14 @@ func (t *TextOutput) Log(log *Log) {
 		buf.WriteRune('\n')
 	}
 
-	if t.flags&TextOutputFlagStackTrace != 0 && log.StackTrace != nil {
+	if o.flags&TextOutputFlagStackTrace != 0 && log.StackTrace != nil {
 		extend()
 		buf.WriteString(fmt.Sprintf("%+1.1s", log.StackTrace))
 		buf.WriteString("\n\t")
 		buf.WriteRune('\n')
 	}
 
-	_, err = t.w.Write(buf.Bytes())
+	_, err = o.w.Write(buf.Bytes())
 	if err != nil {
 		return
 	}
@@ -281,28 +281,28 @@ func (t *TextOutput) Log(log *Log) {
 
 // SetWriter sets writer.
 // It returns underlying TextOutput.
-func (t *TextOutput) SetWriter(w io.Writer) *TextOutput {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	t.w = w
-	return t
+func (o *TextOutput) SetWriter(w io.Writer) *TextOutput {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.w = w
+	return o
 }
 
 // SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
 // It returns underlying TextOutput.
 // By default, 0.
-func (t *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	t.flags = flags
-	return t
+func (o *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.flags = flags
+	return o
 }
 
 // SetOnError sets a function to call when error occurs.
 // It returns underlying TextOutput.
-func (t *TextOutput) SetOnError(f func(error)) *TextOutput {
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&t.onError)), unsafe.Pointer(&f))
-	return t
+func (o *TextOutput) SetOnError(f func(error)) *TextOutput {
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onError)), unsafe.Pointer(&f))
+	return o
 }
 
 // TextOutputFlag holds single or multiple flags of TextOutput.
