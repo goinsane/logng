@@ -1,6 +1,8 @@
 package logng
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"sync"
@@ -20,6 +22,7 @@ type Logger struct {
 	prefix             string
 	suffix             string
 	fields             Fields
+	ctxErrVerbosity    Verbose
 }
 
 // NewLogger creates a new Logger. If severity is invalid, it sets SeverityInfo.
@@ -64,6 +67,13 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	}
 	l.mu.RLock()
 	defer l.mu.RUnlock()
+	if !(l.verbose >= l.verbosity) {
+		return
+	}
+	if (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) &&
+		!(l.verbose >= l.ctxErrVerbosity) {
+		return
+	}
 	if l.output != nil && l.severity >= severity && l.verbose >= l.verbosity {
 		messageLen := len(l.prefix) + len(message) + len(l.suffix)
 		log := &Log{
@@ -303,9 +313,12 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
 	}
+	l.mu.RLock()
 	if !(l.verbose >= verbosity) {
+		l.mu.RUnlock()
 		return nil
 	}
+	l.mu.RUnlock()
 	l2 := l.Clone()
 	l2.verbosity = verbosity
 	return l2
@@ -396,4 +409,15 @@ func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 		fields = append(fields, Field{Key: k, Value: v})
 	}
 	return l.WithFields(fields...)
+}
+
+// WithCtxErrV clones the Logger with context error verbosity.
+// If the log has an error and the error is an context error, the given value is used as verbosity.
+func (l *Logger) WithCtxErrV(verbosity Verbose) *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.ctxErrVerbosity = verbosity
+	return l2
 }
