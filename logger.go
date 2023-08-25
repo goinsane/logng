@@ -64,6 +64,9 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	}
 	l.mu.RLock()
 	defer l.mu.RUnlock()
+	if !(l.verbose >= l.verbosity) {
+		return
+	}
 	if l.output != nil && l.severity >= severity && l.verbose >= l.verbosity {
 		messageLen := len(l.prefix) + len(message) + len(l.suffix)
 		log := &Log{
