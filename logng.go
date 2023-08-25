@@ -211,6 +211,12 @@ func WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return defaultLogger.WithFieldMap(fieldMap)
 }
 
+// WithCtxErrV clones the default Logger with context error verbosity.
+// If the log has an error and the error is an context error, the given value is used as verbosity.
+func WithCtxErrV(verbosity Verbose) *Logger {
+	return defaultLogger.WithCtxErrV(verbosity)
+}
+
 var (
 	defaultTextOutput       = NewTextOutput(defaultTextOutputWriter, TextOutputFlagDefault)
 	defaultTextOutputWriter = os.Stderr
