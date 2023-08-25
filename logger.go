@@ -306,9 +306,12 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
 	}
+	l.mu.RLock()
 	if !(l.verbose >= verbosity) {
+		l.mu.RUnlock()
 		return nil
 	}
+	l.mu.RUnlock()
 	l2 := l.Clone()
 	l2.verbosity = verbosity
 	return l2
