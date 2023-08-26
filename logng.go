@@ -171,6 +171,11 @@ func V(verbosity Verbose) *Logger {
 	return defaultLogger.V(verbosity)
 }
 
+// WithVerbosity clones the default Logger with given verbosity.
+func WithVerbosity(verbosity Verbose) *Logger {
+	return defaultLogger.WithVerbosity(verbosity)
+}
+
 // WithTime clones the default Logger with given time.
 func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
