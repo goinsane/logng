@@ -57,6 +57,7 @@ func (l *Logger) Clone() *Logger {
 		prefix:             l.prefix,
 		suffix:             l.suffix,
 		fields:             l.fields.Clone(),
+		ctxErrVerbosity:    l.ctxErrVerbosity,
 	}
 	return l2
 }
