@@ -309,7 +309,7 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// V clones the Logger if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the Logger with given verbosity if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
 func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -320,6 +320,14 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 		return nil
 	}
 	l.mu.RUnlock()
+	return l.WithVerbosity(verbosity)
+}
+
+// WithVerbosity clones the Logger with given verbosity.
+func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
+	if l == nil {
+		return nil
+	}
 	l2 := l.Clone()
 	l2.verbosity = verbosity
 	return l2

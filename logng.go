@@ -166,7 +166,7 @@ func SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return defaultLogger.SetStackTraceSeverity(stackTraceSeverity)
 }
 
-// V clones the default Logger if the default Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the default Logger with given verbosity if the default Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
 func V(verbosity Verbose) *Logger {
 	return defaultLogger.V(verbosity)
 }
