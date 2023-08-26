@@ -57,6 +57,7 @@ func (l *Logger) Clone() *Logger {
 		prefix:             l.prefix,
 		suffix:             l.suffix,
 		fields:             l.fields.Clone(),
+		ctxErrVerbosity:    l.ctxErrVerbosity,
 	}
 	return l2
 }
@@ -308,7 +309,7 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// V clones the Logger if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the Logger with given verbosity if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
 func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -319,6 +320,14 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 		return nil
 	}
 	l.mu.RUnlock()
+	return l.WithVerbosity(verbosity)
+}
+
+// WithVerbosity clones the Logger with given verbosity.
+func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
+	if l == nil {
+		return nil
+	}
 	l2 := l.Clone()
 	l2.verbosity = verbosity
 	return l2
@@ -411,9 +420,9 @@ func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithCtxErrV clones the Logger with context error verbosity.
+// WithCtxErrVerbosity clones the Logger with context error verbosity.
 // If the log has an error and the error is an context error, the given value is used as verbosity.
-func (l *Logger) WithCtxErrV(verbosity Verbose) *Logger {
+func (l *Logger) WithCtxErrVerbosity(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
 	}
