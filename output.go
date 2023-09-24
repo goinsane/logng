@@ -152,7 +152,8 @@ func NewTextOutput(w io.Writer, flags TextOutputFlag) *TextOutput {
 func (o *TextOutput) Log(log *Log) {
 	var err error
 	defer func() {
-		if err == nil || o.onError == nil || *o.onError == nil {
+		onError := o.onError
+		if err == nil || onError == nil || *onError == nil {
 			return
 		}
 		(*o.onError)(err)
@@ -370,7 +371,8 @@ func NewJSONOutput(w io.Writer, flags JSONOutputFlag) *JSONOutput {
 func (o *JSONOutput) Log(log *Log) {
 	var err error
 	defer func() {
-		if err == nil || o.onError == nil || *o.onError == nil {
+		onError := o.onError
+		if err == nil || onError == nil || *onError == nil {
 			return
 		}
 		(*o.onError)(err)
