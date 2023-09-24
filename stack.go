@@ -164,7 +164,7 @@ func (t *StackTrace) SizeOfProgramCounters() int {
 }
 
 // Callers returns callers.
-func (t *StackTrace) Callers(index int) []StackCaller {
+func (t *StackTrace) Callers() []StackCaller {
 	result := make([]StackCaller, len(t.callers))
 	copy(result, t.callers)
 	return result
