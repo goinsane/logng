@@ -156,7 +156,7 @@ func (o *TextOutput) Log(log *Log) {
 		if err == nil || onError == nil || *onError == nil {
 			return
 		}
-		(*o.onError)(err)
+		(*onError)(err)
 	}()
 
 	o.mu.Lock()
@@ -375,7 +375,7 @@ func (o *JSONOutput) Log(log *Log) {
 		if err == nil || onError == nil || *onError == nil {
 			return
 		}
-		(*o.onError)(err)
+		(*onError)(err)
 	}()
 
 	o.mu.Lock()
