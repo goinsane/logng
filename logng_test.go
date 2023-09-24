@@ -1,7 +1,7 @@
 package logng_test
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"testing"
 	"time"
@@ -204,7 +204,7 @@ func ExampleLogger() {
 }
 
 func BenchmarkLogger_Info(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
@@ -212,7 +212,7 @@ func BenchmarkLogger_Info(b *testing.B) {
 }
 
 func BenchmarkLogger_Infof(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Infof("%s", "benchmark")
@@ -220,7 +220,7 @@ func BenchmarkLogger_Infof(b *testing.B) {
 }
 
 func BenchmarkLogger_Infoln(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Infoln("benchmark")
@@ -228,7 +228,7 @@ func BenchmarkLogger_Infoln(b *testing.B) {
 }
 
 func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	logger.SetStackTraceSeverity(logng.SeverityInfo)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -237,7 +237,7 @@ func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
 }
 
 func BenchmarkLogger_Info_withTextOutputFlagLongFunc(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFunc), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFunc), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
@@ -245,7 +245,7 @@ func BenchmarkLogger_Info_withTextOutputFlagLongFunc(b *testing.B) {
 }
 
 func BenchmarkLogger_Info_withTextOutputFlagShortFunc(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFunc), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFunc), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
@@ -253,7 +253,7 @@ func BenchmarkLogger_Info_withTextOutputFlagShortFunc(b *testing.B) {
 }
 
 func BenchmarkLogger_Info_withFlagLongFile(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFile), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFile), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
@@ -261,7 +261,7 @@ func BenchmarkLogger_Info_withFlagLongFile(b *testing.B) {
 }
 
 func BenchmarkLogger_Info_withTextOutputFlagShortFile(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFile), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFile), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
@@ -269,7 +269,7 @@ func BenchmarkLogger_Info_withTextOutputFlagShortFile(b *testing.B) {
 }
 
 func BenchmarkLogger_V(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 5)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 5)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.V(1)
@@ -277,7 +277,7 @@ func BenchmarkLogger_V(b *testing.B) {
 }
 
 func BenchmarkLogger_WithTime(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.WithTime(testTime)
@@ -285,7 +285,7 @@ func BenchmarkLogger_WithTime(b *testing.B) {
 }
 
 func BenchmarkLogger_WithPrefix(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.WithPrefix("prefix")
@@ -293,7 +293,7 @@ func BenchmarkLogger_WithPrefix(b *testing.B) {
 }
 
 func BenchmarkLogger_WithPrefixf(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.WithPrefixf("%s", "prefix")
@@ -301,7 +301,7 @@ func BenchmarkLogger_WithPrefixf(b *testing.B) {
 }
 
 func BenchmarkLogger_WithFieldKeyVals(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(ioutil.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.WithFieldKeyVals("key1", "value1")

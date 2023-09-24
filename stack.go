@@ -21,23 +21,24 @@ func (c StackCaller) String() string {
 // Format is implementation of fmt.Formatter.
 //
 // For '%s' (also '%v'):
-// 	%s       just show function and entry without padding and indent.
-// 	%+s      show file path, line and program counter. padding char '\t', default padding 0, default indent 1.
-// 	% s      show file path, line and program counter. padding char ' ', default padding 0, default indent 2.
-// 	%+ s     exact with '% s'.
-// 	%#s      same with '%+s', use file name as file path.
-// 	%+#s     exact with '%#s'.
-// 	% #s     same with '% s', use file name as file path.
-// 	%+4s     same with '%+s', padding 4, indent 1 by default.
-// 	%+.3s    same with '%+s', padding 0 by default, indent 3.
-// 	%+4.3s   same with '%+s', padding 4, indent 3.
-// 	%+4.s    same with '%+s', padding 4, indent 0.
-// 	% 4s     same with '% s', padding 4, indent 2 by default.
-// 	% .3s    same with '% s', padding 0 by default, indent 3.
-// 	% 4.3s   same with '% s', padding 4, indent 3.
-// 	% 4.s    same with '% s', padding 4, indent 0.
-// 	%#4.3s   same with '%#s', padding 4, indent 3.
-// 	% #4.3s  same with '% #s', padding 4, indent 3.
+//
+//	%s       just show function and entry without padding and indent.
+//	%+s      show file path, line and program counter. padding char '\t', default padding 0, default indent 1.
+//	% s      show file path, line and program counter. padding char ' ', default padding 0, default indent 2.
+//	%+ s     exact with '% s'.
+//	%#s      same with '%+s', use file name as file path.
+//	%+#s     exact with '%#s'.
+//	% #s     same with '% s', use file name as file path.
+//	%+4s     same with '%+s', padding 4, indent 1 by default.
+//	%+.3s    same with '%+s', padding 0 by default, indent 3.
+//	%+4.3s   same with '%+s', padding 4, indent 3.
+//	%+4.s    same with '%+s', padding 4, indent 0.
+//	% 4s     same with '% s', padding 4, indent 2 by default.
+//	% .3s    same with '% s', padding 0 by default, indent 3.
+//	% 4.3s   same with '% s', padding 4, indent 3.
+//	% 4.s    same with '% s', padding 4, indent 0.
+//	%#4.3s   same with '%#s', padding 4, indent 3.
+//	% #4.3s  same with '% #s', padding 4, indent 3.
 func (c StackCaller) Format(f fmt.State, verb rune) {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 	switch verb {
@@ -163,7 +164,7 @@ func (t *StackTrace) SizeOfProgramCounters() int {
 }
 
 // Callers returns callers.
-func (t *StackTrace) Callers(index int) []StackCaller {
+func (t *StackTrace) Callers() []StackCaller {
 	result := make([]StackCaller, len(t.callers))
 	copy(result, t.callers)
 	return result
