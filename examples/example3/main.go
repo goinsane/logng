@@ -14,8 +14,10 @@ var (
 func main() {
 	// reset logng for previous changes if it is running in go test.
 	logng.Reset()
-	// set JSONOutput.
-	logng.SetOutput(logng.NewJSONOutput2(os.Stdout, logng.JSONOutput2FlagDefault))
+
+	// set JSONOutput2.
+	output := logng.NewJSONOutput2(os.Stdout, logng.JSONOutput2FlagDefault)
+	logng.SetOutput(output)
 
 	// log by Severity.
 	// default severity is SeverityInfo.
@@ -54,4 +56,14 @@ func main() {
 
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
+
+	output.SetFlags(logng.JSONOutput2FlagSeverity |
+		logng.JSONOutput2FlagTime |
+		logng.JSONOutput2FlagTimestamp |
+		logng.JSONOutput2FlagUTC |
+		logng.JSONOutput2FlagSeverityLevel |
+		logng.JSONOutput2FlagVerbosity |
+		logng.JSONOutput2FlagLongFunc |
+		logng.JSONOutput2FlagShortFile)
+	logng.Info("test new flags")
 }
