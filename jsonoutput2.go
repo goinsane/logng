@@ -215,5 +215,6 @@ const (
 
 	JSONOutput2FlagFields
 
-	JSONOutput2FlagDefault = JSONOutput2FlagSeverity | JSONOutput2FlagTime | JSONOutput2FlagStackTrace | JSONOutput2FlagFields
+	JSONOutput2FlagDefault = JSONOutput2FlagSeverity | JSONOutput2FlagTime | JSONOutput2FlagLongFunc |
+		JSONOutput2FlagShortFile | JSONOutput2FlagStackTrace | JSONOutput2FlagFields
 )
