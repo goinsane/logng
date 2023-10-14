@@ -68,9 +68,6 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	}
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	if !(l.verbose >= l.verbosity) {
-		return
-	}
 	if (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) &&
 		!(l.verbose >= l.ctxErrVerbosity) {
 		return

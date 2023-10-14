@@ -14,8 +14,10 @@ var (
 func main() {
 	// reset logng for previous changes if it is running in go test.
 	logng.Reset()
-	// change writer of default output to stdout from stderr.
-	logng.SetTextOutputWriter(os.Stdout)
+
+	// set JSONOutput2.
+	output := logng.NewJSONOutput2(os.Stdout, logng.JSONOutput2FlagDefault)
+	logng.SetOutput(output)
 
 	// log by Severity.
 	// default severity is SeverityInfo.
@@ -55,13 +57,13 @@ func main() {
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
 
-	// SetTextOutputFlags()
-	// default flags is TextOutputFlagDefault.
-	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
-	logng.Info("this is info log. you can see file name and line in this log.")
-
-	// multi-line logs
-	logng.Info("this is\nmulti-line log with file name")
-	logng.Info("this is\nmulti-line log")
-	logng.WithFieldKeyVals("key1", "val1").Info("this is\nmulti-line log with key vals")
+	output.SetFlags(logng.JSONOutput2FlagSeverity |
+		logng.JSONOutput2FlagTime |
+		logng.JSONOutput2FlagTimestamp |
+		logng.JSONOutput2FlagUTC |
+		logng.JSONOutput2FlagSeverityLevel |
+		logng.JSONOutput2FlagVerbosity |
+		logng.JSONOutput2FlagShortFunc |
+		logng.JSONOutput2FlagLongFile)
+	logng.Info("test new flags")
 }
