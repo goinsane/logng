@@ -13,17 +13,19 @@ import (
 
 // JSONOutput2 is an implementation of Output by writing json to io.Writer w.
 type JSONOutput2 struct {
-	mu      sync.Mutex
-	w       io.Writer
-	flags   JSONOutput2Flag
-	onError *func(error)
+	mu         sync.Mutex
+	w          io.Writer
+	flags      JSONOutput2Flag
+	onError    *func(error)
+	timeLayout string
 }
 
 // NewJSONOutput2 creates a new JSONOutput2.
 func NewJSONOutput2(w io.Writer, flags JSONOutput2Flag) *JSONOutput2 {
 	return &JSONOutput2{
-		w:     w,
-		flags: flags,
+		w:          w,
+		flags:      flags,
+		timeLayout: time.RFC3339Nano,
 	}
 }
 
@@ -44,15 +46,15 @@ func (o *JSONOutput2) Log(log *Log) {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
 	var data struct {
-		Severity      *string    `json:"severity,omitempty"`
-		Message       string     `json:"message"`
-		Time          *time.Time `json:"time,omitempty"`
-		Timestamp     *int64     `json:"timestamp,omitempty"`
-		SeverityLevel *int       `json:"severity_level,omitempty"`
-		Verbosity     *int       `json:"verbosity,omitempty"`
-		Func          *string    `json:"func,omitempty"`
-		File          *string    `json:"file,omitempty"`
-		StackTrace    *string    `json:"stack_trace,omitempty"`
+		Severity      *string `json:"severity,omitempty"`
+		Message       string  `json:"message"`
+		Time          *string `json:"time,omitempty"`
+		Timestamp     *int64  `json:"timestamp,omitempty"`
+		SeverityLevel *int    `json:"severity_level,omitempty"`
+		Verbosity     *int    `json:"verbosity,omitempty"`
+		Func          *string `json:"func,omitempty"`
+		File          *string `json:"file,omitempty"`
+		StackTrace    *string `json:"stack_trace,omitempty"`
 	}
 	data.Message = string(log.Message)
 
@@ -67,7 +69,8 @@ func (o *JSONOutput2) Log(log *Log) {
 			tm = tm.UTC()
 		}
 		if o.flags&JSONOutput2FlagTime != 0 {
-			data.Time = &tm
+			x := tm.Format(o.timeLayout)
+			data.Time = &x
 		}
 		if o.flags&JSONOutput2FlagTimestamp != 0 {
 			x := tm.Unix()
@@ -185,6 +188,15 @@ func (o *JSONOutput2) SetFlags(flags JSONOutput2Flag) *JSONOutput2 {
 // It returns underlying JSONOutput2.
 func (o *JSONOutput2) SetOnError(f func(error)) *JSONOutput2 {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onError)), unsafe.Pointer(&f))
+	return o
+}
+
+// SetTimeLayout sets a time layout to format time field.
+// It returns underlying JSONOutput2.
+func (o *JSONOutput2) SetTimeLayout(timeLayout string) *JSONOutput2 {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.timeLayout = timeLayout
 	return o
 }
 
