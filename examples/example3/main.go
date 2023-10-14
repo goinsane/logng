@@ -63,7 +63,7 @@ func main() {
 		logng.JSONOutput2FlagUTC |
 		logng.JSONOutput2FlagSeverityLevel |
 		logng.JSONOutput2FlagVerbosity |
-		logng.JSONOutput2FlagLongFunc |
-		logng.JSONOutput2FlagShortFile)
+		logng.JSONOutput2FlagShortFunc |
+		logng.JSONOutput2FlagLongFile)
 	logng.Info("test new flags")
 }
