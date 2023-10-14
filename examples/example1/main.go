@@ -26,24 +26,19 @@ func main() {
 	logng.V(1).Error("this is error log, verbosity 1. but it won't be shown.")
 
 	// SetSeverity()
+	// default severity is SeverityInfo.
 	logng.SetSeverity(logng.SeverityDebug)
 	logng.Debug("this is debug log. it will now be shown.")
 
 	// SetVerbose() and V()
+	// default verbose is 0
 	logng.SetVerbose(1)
 	logng.V(1).Error("this is error log, verbosity 1. it will now be shown.")
 	logng.V(2).Warning("this is warning log, verbosity 2. it won't be shown.")
 
-	// SetFlags()
-	// default flags is TextOutputFlagDefault.
-	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
-	logng.Info("this is info log. you can see file name and line in this log.")
-
-	// log using Print.
+	// SetPrintSeverity()
 	// default print severity is SeverityInfo.
 	logng.Print("this log will be shown as info log.")
-
-	// SetPrintSeverity()
 	logng.SetPrintSeverity(logng.SeverityWarning)
 	logng.Print("this log will now be shown as warning log.")
 
@@ -60,9 +55,13 @@ func main() {
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
 
+	// SetTextOutputFlags()
+	// default flags is TextOutputFlagDefault.
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
+	logng.Info("this is info log. you can see file name and line in this log.")
+
 	// multi-line logs
 	logng.Info("this is\nmulti-line log with file name")
-	logng.SetTextOutputFlags(logng.TextOutputFlagDefault)
 	logng.Info("this is\nmulti-line log")
 	logng.WithFieldKeyVals("key1", "val1").Info("this is\nmulti-line log with key vals")
 }
