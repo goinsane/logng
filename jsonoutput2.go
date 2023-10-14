@@ -63,13 +63,13 @@ func (o *JSONOutput2) Log(log *Log) {
 
 	if o.flags&(JSONOutput2FlagTime|JSONOutput2FlagTimestamp) != 0 {
 		tm := log.Time
-		if o.flags%JSONOutput2FlagUTC != 0 {
+		if o.flags&JSONOutput2FlagUTC != 0 {
 			tm = tm.UTC()
 		}
-		if o.flags%JSONOutput2FlagTime != 0 {
+		if o.flags&JSONOutput2FlagTime != 0 {
 			data.Time = &tm
 		}
-		if o.flags%JSONOutput2FlagTimestamp != 0 {
+		if o.flags&JSONOutput2FlagTimestamp != 0 {
 			x := tm.Unix()
 			data.Timestamp = &x
 		}
