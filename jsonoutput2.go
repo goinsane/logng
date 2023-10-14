@@ -48,7 +48,7 @@ func (o *JSONOutput2) Log(log *Log) {
 		Message       string     `json:"message"`
 		Time          *time.Time `json:"time,omitempty"`
 		Timestamp     *int64     `json:"timestamp,omitempty"`
-		SeverityLevel *int       `json:"severityLevel,omitempty"`
+		SeverityLevel *int       `json:"severity_level,omitempty"`
 		Verbosity     *int       `json:"verbosity,omitempty"`
 		Func          *string    `json:"func,omitempty"`
 		File          *string    `json:"file,omitempty"`
