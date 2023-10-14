@@ -45,9 +45,9 @@ func main() {
 	// SetStackTraceSeverity()
 	// default stack trace severity is none.
 	logng.SetStackTraceSeverity(logng.SeverityWarning)
-	logng.Warning("this is warning log. you can see stack trace end of this log.")
-	logng.Error("this is error log. you can still see stack trace end of this log.")
-	logng.Info("this is info log. stack trace won't be shown end of this log.")
+	logng.Warning("this is warning log. you can see stack trace for this log.")
+	logng.Error("this is error log. you can still see stack trace for this log.")
+	logng.Info("this is info log. stack trace won't be shown for this log.")
 
 	// WithTime()
 	logng.WithTime(testTime).Info("this is info log with custom time.")
