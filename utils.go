@@ -54,7 +54,7 @@ func trimSrcPath(s string) string {
 func trimDirs(s string) string {
 	r := []rune(s)
 	for i := len(r) - 1; i > 0; i-- {
-		if r[i] == os.PathSeparator {
+		if r[i] == '/' || r[i] == os.PathSeparator {
 			return string(r[i+1:])
 		}
 	}
