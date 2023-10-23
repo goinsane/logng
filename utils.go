@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/build"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -27,13 +28,23 @@ func itoa(buf *[]byte, i int, wid int) {
 	*buf = append(*buf, b[bp:]...)
 }
 
+var (
+	goRootSrcPath = filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator)
+	goSrcPath     = filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator)
+	sPkgModPath   = filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator)
+)
+
 func trimSrcPath(s string) string {
 	var r string
-	r = strings.TrimPrefix(s, build.Default.GOROOT+"/src/")
+	r = strings.TrimPrefix(s, goRootSrcPath)
 	if r != s {
 		return r
 	}
-	r = strings.TrimPrefix(s, build.Default.GOPATH+"/src/")
+	r = strings.TrimPrefix(s, goSrcPath)
+	if r != s {
+		return r
+	}
+	r = strings.TrimPrefix(s, sPkgModPath)
 	if r != s {
 		return r
 	}
