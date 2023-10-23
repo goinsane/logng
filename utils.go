@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/build"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -27,13 +28,23 @@ func itoa(buf *[]byte, i int, wid int) {
 	*buf = append(*buf, b[bp:]...)
 }
 
+var (
+	goRootSrcPath = filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator)
+	goSrcPath     = filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator)
+	goPkgModPath  = filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator)
+)
+
 func trimSrcPath(s string) string {
 	var r string
-	r = strings.TrimPrefix(s, build.Default.GOROOT+"/src/")
+	r = strings.TrimPrefix(s, goRootSrcPath)
 	if r != s {
 		return r
 	}
-	r = strings.TrimPrefix(s, build.Default.GOPATH+"/src/")
+	r = strings.TrimPrefix(s, goSrcPath)
+	if r != s {
+		return r
+	}
+	r = strings.TrimPrefix(s, goPkgModPath)
 	if r != s {
 		return r
 	}
@@ -41,12 +52,13 @@ func trimSrcPath(s string) string {
 }
 
 func trimDirs(s string) string {
-	for i := len(s) - 1; i > 0; i-- {
-		if s[i] == '/' || s[i] == os.PathSeparator {
-			return s[i+1:]
+	r := []rune(s)
+	for i := len(r) - 1; i > 0; i-- {
+		if r[i] == os.PathSeparator {
+			return string(r[i+1:])
 		}
 	}
-	return s
+	return string(r)
 }
 
 func getPadWidPrec(f fmt.State) (pad byte, wid, prec int) {
