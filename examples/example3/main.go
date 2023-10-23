@@ -59,7 +59,7 @@ func main() {
 
 	output.SetFlags(logng.JSONOutput2FlagSeverity |
 		logng.JSONOutput2FlagTime |
-		logng.JSONOutput2FlagTimestamp |
+		logng.JSONOutput2FlagTimestampMicro |
 		logng.JSONOutput2FlagUTC |
 		logng.JSONOutput2FlagSeverityLevel |
 		logng.JSONOutput2FlagVerbosity |
