@@ -52,12 +52,13 @@ func trimSrcPath(s string) string {
 }
 
 func trimDirs(s string) string {
-	for i := len(s) - 1; i > 0; i-- {
-		if s[i] == '/' || s[i] == os.PathSeparator {
-			return s[i+1:]
+	r := []rune(s)
+	for i := len(r) - 1; i > 0; i-- {
+		if r[i] == os.PathSeparator {
+			return string(r[i+1:])
 		}
 	}
-	return s
+	return string(r)
 }
 
 func getPadWidPrec(f fmt.State) (pad byte, wid, prec int) {
