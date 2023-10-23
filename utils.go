@@ -29,9 +29,15 @@ func itoa(buf *[]byte, i int, wid int) {
 }
 
 var (
-	goRootSrcPath = filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator)
-	goSrcPath     = filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator)
-	goPkgModPath  = filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator)
+	goRootSrcPath = filepath.ToSlash(
+		filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator),
+	)
+	goSrcPath = filepath.ToSlash(
+		filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator),
+	)
+	goPkgModPath = filepath.ToSlash(
+		filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator),
+	)
 )
 
 func trimSrcPath(s string) string {
@@ -52,13 +58,12 @@ func trimSrcPath(s string) string {
 }
 
 func trimDirs(s string) string {
-	r := []rune(s)
-	for i := len(r) - 1; i > 0; i-- {
-		if r[i] == '/' || r[i] == os.PathSeparator {
-			return string(r[i+1:])
+	for i := len(s) - 1; i > 0; i-- {
+		if s[i] == '/' {
+			return s[i+1:]
 		}
 	}
-	return string(r)
+	return s
 }
 
 func getPadWidPrec(f fmt.State) (pad byte, wid, prec int) {
