@@ -31,7 +31,7 @@ func itoa(buf *[]byte, i int, wid int) {
 var (
 	goRootSrcPath = filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator)
 	goSrcPath     = filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator)
-	sPkgModPath   = filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator)
+	goPkgModPath  = filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator)
 )
 
 func trimSrcPath(s string) string {
@@ -44,7 +44,7 @@ func trimSrcPath(s string) string {
 	if r != s {
 		return r
 	}
-	r = strings.TrimPrefix(s, sPkgModPath)
+	r = strings.TrimPrefix(s, goPkgModPath)
 	if r != s {
 		return r
 	}
