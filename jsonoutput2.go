@@ -63,7 +63,7 @@ func (o *JSONOutput2) Log(log *Log) {
 		data.Severity = &x
 	}
 
-	if o.flags&(JSONOutput2FlagTime|JSONOutput2FlagTimestamp) != 0 {
+	if o.flags&(JSONOutput2FlagTime|JSONOutput2FlagTimestamp|JSONOutput2FlagTimestampNano) != 0 {
 		tm := log.Time
 		if o.flags&JSONOutput2FlagUTC != 0 {
 			tm = tm.UTC()
@@ -72,8 +72,13 @@ func (o *JSONOutput2) Log(log *Log) {
 			x := tm.Format(o.timeLayout)
 			data.Time = &x
 		}
-		if o.flags&JSONOutput2FlagTimestamp != 0 {
-			x := tm.Unix()
+		if o.flags&(JSONOutput2FlagTimestamp|JSONOutput2FlagTimestampNano) != 0 {
+			var x int64
+			if o.flags&JSONOutput2FlagTimestampNano == 0 {
+				x = tm.Unix()
+			} else {
+				x = tm.UnixNano()
+			}
 			data.Timestamp = &x
 		}
 	}
@@ -208,6 +213,8 @@ const (
 	JSONOutput2FlagTime
 
 	JSONOutput2FlagTimestamp
+
+	JSONOutput2FlagTimestampNano
 
 	JSONOutput2FlagUTC
 
