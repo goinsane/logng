@@ -77,7 +77,7 @@ func (o *JSONOutput2) Log(log *Log) {
 			if o.flags&JSONOutput2FlagTimestampMicro == 0 {
 				x = tm.Unix()
 			} else {
-				x = tm.UnixNano() / 1e3
+				x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
 			}
 			data.Timestamp = &x
 		}

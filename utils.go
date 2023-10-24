@@ -36,7 +36,7 @@ var (
 		filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator),
 	)
 	goPkgModPath = filepath.ToSlash(
-		filepath.Join(build.Default.GOPATH, filepath.Join("pkg", "mod")) + string(os.PathSeparator),
+		filepath.Join(build.Default.GOPATH, "pkg", "mod") + string(os.PathSeparator),
 	)
 )
 
