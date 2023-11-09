@@ -80,8 +80,9 @@ func (q *QueuedOutput) Log(log *Log) {
 	select {
 	case q.queue <- log:
 	default:
-		if q.onQueueFull != nil && *q.onQueueFull != nil {
-			(*q.onQueueFull)()
+		onQueueFull := q.onQueueFull
+		if onQueueFull != nil && *onQueueFull != nil {
+			(*onQueueFull)()
 		}
 	}
 }
