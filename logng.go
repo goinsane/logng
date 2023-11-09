@@ -166,37 +166,37 @@ func SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return defaultLogger.SetStackTraceSeverity(stackTraceSeverity)
 }
 
-// V clones the default Logger with given verbosity if the default Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the default Logger with the given verbosity if the default Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.
 func V(verbosity Verbose) *Logger {
 	return defaultLogger.V(verbosity)
 }
 
-// WithVerbosity clones the default Logger with given verbosity.
+// WithVerbosity clones the default Logger with the given verbosity.
 func WithVerbosity(verbosity Verbose) *Logger {
 	return defaultLogger.WithVerbosity(verbosity)
 }
 
-// WithTime clones the default Logger with given time.
+// WithTime clones the default Logger with the given time.
 func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
 }
 
-// WithPrefix clones the default Logger and adds the given prefix to end of the underlying prefix.
+// WithPrefix clones the default Logger and adds the given prefix to the end of the underlying prefix.
 func WithPrefix(args ...interface{}) *Logger {
 	return defaultLogger.WithPrefix(args...)
 }
 
-// WithPrefixf clones the default Logger and adds the given prefix to end of the underlying prefix.
+// WithPrefixf clones the default Logger and adds the given prefix to the end of the underlying prefix.
 func WithPrefixf(format string, args ...interface{}) *Logger {
 	return defaultLogger.WithPrefixf(format, args...)
 }
 
-// WithSuffix clones the default Logger and adds the given suffix to start of the underlying suffix.
+// WithSuffix clones the default Logger and adds the given suffix to the beginning of the underlying suffix.
 func WithSuffix(args ...interface{}) *Logger {
 	return defaultLogger.WithSuffix(args...)
 }
 
-// WithSuffixf clones the default Logger and adds the given suffix to start of the underlying suffix.
+// WithSuffixf clones the default Logger and adds the given suffix to the beginning of the underlying suffix.
 func WithSuffixf(format string, args ...interface{}) *Logger {
 	return defaultLogger.WithSuffixf(format, args...)
 }
@@ -206,12 +206,12 @@ func WithFields(fields ...Field) *Logger {
 	return defaultLogger.WithFields(fields...)
 }
 
-// WithFieldKeyVals clones the default Logger with given key and values of Field.
+// WithFieldKeyVals clones the default Logger with given keys and values of Field.
 func WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return defaultLogger.WithFieldKeyVals(kvs...)
 }
 
-// WithFieldMap clones the default Logger with given fieldMap.
+// WithFieldMap clones the default Logger with the given fieldMap.
 func WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return defaultLogger.WithFieldMap(fieldMap)
 }
