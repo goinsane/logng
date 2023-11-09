@@ -39,27 +39,31 @@ type QueuedOutput struct {
 	queue       chan *Log
 	ctx         context.Context
 	cancel      context.CancelFunc
+	wg          sync.WaitGroup
+	logWg       sync.WaitGroup
 	blocking    uint32
 	onQueueFull *func()
 }
 
 // NewQueuedOutput creates QueuedOutput by given output.
 func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
-	if queueLen < 0 {
-		queueLen = 0
-	}
 	q = &QueuedOutput{
 		output: output,
 		queue:  make(chan *Log, queueLen),
 	}
 	q.ctx, q.cancel = context.WithCancel(context.Background())
+	q.wg.Add(1)
 	go q.worker()
 	return
 }
 
-// Close closed QueuedOutput. Unused QueuedOutput must be closed for freeing resources.
+// Close stops accepting new logs to the underlying QueuedOutput and waits for the queue to empty.
+// Unused QueuedOutput must be closed for freeing resources.
 func (q *QueuedOutput) Close() error {
 	q.cancel()
+	q.logWg.Wait()
+	close(q.queue)
+	q.wg.Wait()
 	return nil
 }
 
@@ -68,10 +72,10 @@ func (q *QueuedOutput) Close() error {
 // Otherwise, Log method sends log to queue if queue is available. When queue is full, it tries to call OnQueueFull
 // function.
 func (q *QueuedOutput) Log(log *Log) {
-	select {
-	case <-q.ctx.Done():
+	q.logWg.Add(1)
+	defer q.logWg.Done()
+	if q.ctx.Err() != nil {
 		return
-	default:
 	}
 	if q.blocking != 0 {
 		q.queue <- log
@@ -120,15 +124,9 @@ func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
 }
 
 func (q *QueuedOutput) worker() {
-	for done := false; !done; {
-		select {
-		case <-q.ctx.Done():
-			done = true
-		case msg := <-q.queue:
-			if q.output != nil {
-				q.output.Log(msg)
-			}
-		}
+	defer q.wg.Done()
+	for msg := range q.queue {
+		q.output.Log(msg)
 	}
 }
 
