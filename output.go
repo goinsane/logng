@@ -38,7 +38,7 @@ type QueuedOutput struct {
 	output      Output
 	queue       chan *Log
 	ctx         context.Context
-	ctxCancel   context.CancelFunc
+	cancel      context.CancelFunc
 	blocking    uint32
 	onQueueFull *func()
 }
@@ -52,14 +52,14 @@ func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
 		output: output,
 		queue:  make(chan *Log, queueLen),
 	}
-	q.ctx, q.ctxCancel = context.WithCancel(context.Background())
+	q.ctx, q.cancel = context.WithCancel(context.Background())
 	go q.worker()
 	return
 }
 
 // Close closed QueuedOutput. Unused QueuedOutput must be closed for freeing resources.
 func (q *QueuedOutput) Close() error {
-	q.ctxCancel()
+	q.cancel()
 	return nil
 }
 
