@@ -111,7 +111,7 @@ func (q *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
 
 // WaitForEmpty waits until the queue is empty by the given context.
 func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
-	for {
+	for ctx.Err() == nil {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -121,6 +121,7 @@ func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
 			}
 		}
 	}
+	return ctx.Err()
 }
 
 func (q *QueuedOutput) worker() {
