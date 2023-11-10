@@ -306,7 +306,7 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// V clones the Logger with given verbosity if the Logger's verbose is greater or equal to given verbosity, otherwise returns nil.
+// V clones the Logger with the given verbosity if the Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.
 func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -320,7 +320,7 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 	return l.WithVerbosity(verbosity)
 }
 
-// WithVerbosity clones the Logger with given verbosity.
+// WithVerbosity clones the Logger with the given verbosity.
 func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -330,7 +330,7 @@ func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
 	return l2
 }
 
-// WithTime clones the Logger with given time.
+// WithTime clones the Logger with the given time.
 func (l *Logger) WithTime(tm time.Time) *Logger {
 	if l == nil {
 		return nil
@@ -340,7 +340,7 @@ func (l *Logger) WithTime(tm time.Time) *Logger {
 	return l2
 }
 
-// WithPrefix clones the Logger and adds the given prefix to end of the underlying prefix.
+// WithPrefix clones the Logger and adds the given prefix to the end of the underlying prefix.
 func (l *Logger) WithPrefix(args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -350,7 +350,7 @@ func (l *Logger) WithPrefix(args ...interface{}) *Logger {
 	return l2
 }
 
-// WithPrefixf clones the Logger and adds the given prefix to end of the underlying prefix.
+// WithPrefixf clones the Logger and adds the given prefix to the end of the underlying prefix.
 func (l *Logger) WithPrefixf(format string, args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -360,7 +360,7 @@ func (l *Logger) WithPrefixf(format string, args ...interface{}) *Logger {
 	return l2
 }
 
-// WithSuffix clones the Logger and adds the given suffix to start of the underlying suffix.
+// WithSuffix clones the Logger and adds the given suffix to the beginning of the underlying suffix.
 func (l *Logger) WithSuffix(args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -370,7 +370,7 @@ func (l *Logger) WithSuffix(args ...interface{}) *Logger {
 	return l2
 }
 
-// WithSuffixf clones the Logger and adds the given suffix to start of the underlying suffix.
+// WithSuffixf clones the Logger and adds the given suffix to the beginning of the underlying suffix.
 func (l *Logger) WithSuffixf(format string, args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -390,7 +390,7 @@ func (l *Logger) WithFields(fields ...Field) *Logger {
 	return l2
 }
 
-// WithFieldKeyVals clones the Logger with given key and values of Field.
+// WithFieldKeyVals clones the Logger with given keys and values of Field.
 func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -405,7 +405,7 @@ func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithFieldMap clones the Logger with given fieldMap.
+// WithFieldMap clones the Logger with the given fieldMap.
 func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	if l == nil {
 		return nil

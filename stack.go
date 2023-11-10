@@ -45,7 +45,7 @@ func (c StackCaller) Format(f fmt.State, verb rune) {
 	case 's', 'v':
 		fn := "???"
 		if c.Function != "" {
-			fn = trimSrcPath(c.Function)
+			fn = c.Function
 		}
 		extended := f.Flag('+') || f.Flag(' ') || f.Flag('#')
 		if !extended {

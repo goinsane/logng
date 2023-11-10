@@ -37,41 +37,45 @@ func MultiOutput(outputs ...Output) Output {
 type QueuedOutput struct {
 	output      Output
 	queue       chan *Log
-	ctx         context.Context
-	ctxCancel   context.CancelFunc
+	closing     int32
+	wg          sync.WaitGroup
+	logWg       sync.WaitGroup
 	blocking    uint32
 	onQueueFull *func()
 }
 
-// NewQueuedOutput creates QueuedOutput by given output.
+// NewQueuedOutput creates a new QueuedOutput by the given output.
 func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
-	if queueLen < 0 {
-		queueLen = 0
-	}
 	q = &QueuedOutput{
 		output: output,
 		queue:  make(chan *Log, queueLen),
 	}
-	q.ctx, q.ctxCancel = context.WithCancel(context.Background())
+	q.wg.Add(1)
 	go q.worker()
 	return
 }
 
-// Close closed QueuedOutput. Unused QueuedOutput must be closed for freeing resources.
+// Close stops accepting new logs to the underlying QueuedOutput and waits for the queue to empty.
+// Unused QueuedOutput must be closed for freeing resources.
 func (q *QueuedOutput) Close() error {
-	q.ctxCancel()
+	if !atomic.CompareAndSwapInt32(&q.closing, 0, 1) {
+		return nil
+	}
+	q.logWg.Wait()
+	close(q.queue)
+	q.wg.Wait()
 	return nil
 }
 
-// Log is implementation of Output.
-// If blocking is true, Log method blocks execution until underlying output has finished execution.
-// Otherwise, Log method sends log to queue if queue is available. When queue is full, it tries to call OnQueueFull
-// function.
+// Log is the implementation of Output.
+// If blocking is true, Log method blocks execution until the underlying output has finished execution.
+// Otherwise, Log method sends the log to the queue if the queue is available.
+// When the queue is full, it tries to call OnQueueFull function.
 func (q *QueuedOutput) Log(log *Log) {
-	select {
-	case <-q.ctx.Done():
+	q.logWg.Add(1)
+	defer q.logWg.Done()
+	if q.closing != 0 {
 		return
-	default:
 	}
 	if q.blocking != 0 {
 		q.queue <- log
@@ -80,14 +84,15 @@ func (q *QueuedOutput) Log(log *Log) {
 	select {
 	case q.queue <- log:
 	default:
-		if q.onQueueFull != nil && *q.onQueueFull != nil {
-			(*q.onQueueFull)()
+		onQueueFull := q.onQueueFull
+		if onQueueFull != nil && *onQueueFull != nil {
+			(*onQueueFull)()
 		}
 	}
 }
 
-// SetBlocking sets QueuedOutput behavior when queue is full.
-// It returns underlying QueuedOutput.
+// SetBlocking sets QueuedOutput behavior when the queue is full.
+// It returns the underlying QueuedOutput.
 func (q *QueuedOutput) SetBlocking(blocking bool) *QueuedOutput {
 	var b uint32
 	if blocking {
@@ -97,16 +102,16 @@ func (q *QueuedOutput) SetBlocking(blocking bool) *QueuedOutput {
 	return q
 }
 
-// SetOnQueueFull sets a function to call when queue is full.
-// It returns underlying QueuedOutput.
+// SetOnQueueFull sets a function to call when the queue is full.
+// It returns the underlying QueuedOutput.
 func (q *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&q.onQueueFull)), unsafe.Pointer(&f))
 	return q
 }
 
-// WaitForEmpty waits until queue is empty by given context.
+// WaitForEmpty waits until the queue is empty by the given context.
 func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
-	for {
+	for ctx.Err() == nil {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -116,18 +121,13 @@ func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
 			}
 		}
 	}
+	return ctx.Err()
 }
 
 func (q *QueuedOutput) worker() {
-	for done := false; !done; {
-		select {
-		case <-q.ctx.Done():
-			done = true
-		case msg := <-q.queue:
-			if q.output != nil {
-				q.output.Log(msg)
-			}
-		}
+	defer q.wg.Done()
+	for msg := range q.queue {
+		q.output.Log(msg)
 	}
 }
 
@@ -147,7 +147,7 @@ func NewTextOutput(w io.Writer, flags TextOutputFlag) *TextOutput {
 	}
 }
 
-// Log is implementation of Output.
+// Log is the implementation of Output.
 func (o *TextOutput) Log(log *Log) {
 	var err error
 	defer func() {
@@ -280,7 +280,7 @@ func (o *TextOutput) Log(log *Log) {
 }
 
 // SetWriter sets writer.
-// It returns underlying TextOutput.
+// It returns the underlying TextOutput.
 func (o *TextOutput) SetWriter(w io.Writer) *TextOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -288,8 +288,8 @@ func (o *TextOutput) SetWriter(w io.Writer) *TextOutput {
 	return o
 }
 
-// SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
-// It returns underlying TextOutput.
+// SetFlags sets flags to override every single Log.Flags if argument flags is different from 0.
+// It returns the underlying TextOutput.
 // By default, 0.
 func (o *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
 	o.mu.Lock()
@@ -299,7 +299,7 @@ func (o *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
 }
 
 // SetOnError sets a function to call when error occurs.
-// It returns underlying TextOutput.
+// It returns the underlying TextOutput.
 func (o *TextOutput) SetOnError(f func(error)) *TextOutput {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onError)), unsafe.Pointer(&f))
 	return o
