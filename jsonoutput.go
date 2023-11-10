@@ -27,7 +27,7 @@ func NewJSONOutput(w io.Writer, flags JSONOutputFlag) *JSONOutput {
 	}
 }
 
-// Log is implementation of Output.
+// Log is the implementation of Output.
 func (o *JSONOutput) Log(log *Log) {
 	var err error
 	defer func() {
@@ -134,7 +134,7 @@ func (o *JSONOutput) Log(log *Log) {
 }
 
 // SetWriter sets writer.
-// It returns underlying JSONOutput.
+// It returns the underlying JSONOutput.
 func (o *JSONOutput) SetWriter(w io.Writer) *JSONOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -143,7 +143,7 @@ func (o *JSONOutput) SetWriter(w io.Writer) *JSONOutput {
 }
 
 // SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
-// It returns underlying JSONOutput.
+// It returns the underlying JSONOutput.
 // By default, 0.
 func (o *JSONOutput) SetFlags(flags JSONOutputFlag) *JSONOutput {
 	o.mu.Lock()
@@ -153,7 +153,7 @@ func (o *JSONOutput) SetFlags(flags JSONOutputFlag) *JSONOutput {
 }
 
 // SetOnError sets a function to call when error occurs.
-// It returns underlying JSONOutput.
+// It returns the underlying JSONOutput.
 func (o *JSONOutput) SetOnError(f func(error)) *JSONOutput {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onError)), unsafe.Pointer(&f))
 	return o

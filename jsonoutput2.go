@@ -29,7 +29,7 @@ func NewJSONOutput2(w io.Writer, flags JSONOutput2Flag) *JSONOutput2 {
 	}
 }
 
-// Log is implementation of Output.
+// Log is the implementation of Output.
 func (o *JSONOutput2) Log(log *Log) {
 	var err error
 	defer func() {
@@ -171,7 +171,7 @@ func (o *JSONOutput2) Log(log *Log) {
 }
 
 // SetWriter sets writer.
-// It returns underlying JSONOutput2.
+// It returns the underlying JSONOutput2.
 func (o *JSONOutput2) SetWriter(w io.Writer) *JSONOutput2 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -180,7 +180,7 @@ func (o *JSONOutput2) SetWriter(w io.Writer) *JSONOutput2 {
 }
 
 // SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
-// It returns underlying JSONOutput2.
+// It returns the underlying JSONOutput2.
 // By default, 0.
 func (o *JSONOutput2) SetFlags(flags JSONOutput2Flag) *JSONOutput2 {
 	o.mu.Lock()
@@ -190,14 +190,14 @@ func (o *JSONOutput2) SetFlags(flags JSONOutput2Flag) *JSONOutput2 {
 }
 
 // SetOnError sets a function to call when error occurs.
-// It returns underlying JSONOutput2.
+// It returns the underlying JSONOutput2.
 func (o *JSONOutput2) SetOnError(f func(error)) *JSONOutput2 {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onError)), unsafe.Pointer(&f))
 	return o
 }
 
 // SetTimeLayout sets a time layout to format time field.
-// It returns underlying JSONOutput2.
+// It returns the underlying JSONOutput2.
 func (o *JSONOutput2) SetTimeLayout(timeLayout string) *JSONOutput2 {
 	o.mu.Lock()
 	defer o.mu.Unlock()
