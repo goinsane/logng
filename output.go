@@ -37,8 +37,7 @@ func MultiOutput(outputs ...Output) Output {
 type QueuedOutput struct {
 	output      Output
 	queue       chan *Log
-	ctx         context.Context
-	cancel      context.CancelFunc
+	closing     int32
 	wg          sync.WaitGroup
 	logWg       sync.WaitGroup
 	blocking    uint32
@@ -51,7 +50,6 @@ func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
 		output: output,
 		queue:  make(chan *Log, queueLen),
 	}
-	q.ctx, q.cancel = context.WithCancel(context.Background())
 	q.wg.Add(1)
 	go q.worker()
 	return
@@ -60,7 +58,9 @@ func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
 // Close stops accepting new logs to the underlying QueuedOutput and waits for the queue to empty.
 // Unused QueuedOutput must be closed for freeing resources.
 func (q *QueuedOutput) Close() error {
-	q.cancel()
+	if !atomic.CompareAndSwapInt32(&q.closing, 0, 1) {
+		return nil
+	}
 	q.logWg.Wait()
 	close(q.queue)
 	q.wg.Wait()
@@ -74,7 +74,7 @@ func (q *QueuedOutput) Close() error {
 func (q *QueuedOutput) Log(log *Log) {
 	q.logWg.Add(1)
 	defer q.logWg.Done()
-	if q.ctx.Err() != nil {
+	if q.closing != 0 {
 		return
 	}
 	if q.blocking != 0 {
