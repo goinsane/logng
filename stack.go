@@ -163,21 +163,21 @@ func (t *StackTrace) SizeOfProgramCounters() int {
 	return len(t.programCounters)
 }
 
-// Callers returns stack callers.
+// Callers returns StackCaller's.
 func (t *StackTrace) Callers() []StackCaller {
 	result := make([]StackCaller, len(t.callers))
 	copy(result, t.callers)
 	return result
 }
 
-// SizeOfCallers returns the size of all stack callers.
+// SizeOfCallers returns the size of StackCaller's.
 func (t *StackTrace) SizeOfCallers() int {
 	return len(t.callers)
 }
 
 // Caller returns a caller on the given index. It panics if index is out of range.
 func (t *StackTrace) Caller(index int) StackCaller {
-	if index < 0 || index >= len(t.callers) {
+	if 0 > index || index >= len(t.callers) {
 		panic("index out of range")
 	}
 	return t.callers[index]
