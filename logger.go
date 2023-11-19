@@ -39,7 +39,7 @@ func NewLogger(output Output, severity Severity, verbose Verbose) *Logger {
 	}
 }
 
-// Clone clones the Logger.
+// Clone clones the underlying Logger.
 func (l *Logger) Clone() *Logger {
 	if l == nil {
 		return nil
@@ -239,7 +239,7 @@ func (l *Logger) Debugln(args ...interface{}) {
 	l.logln(SeverityDebug, args...)
 }
 
-// Print logs a log which has the Logger's print severity.
+// Print logs a log which has the underlying Logger's print severity.
 func (l *Logger) Print(args ...interface{}) {
 	if l == nil {
 		return
@@ -247,7 +247,7 @@ func (l *Logger) Print(args ...interface{}) {
 	l.log(l.printSeverity, args...)
 }
 
-// Printf logs a log which has the Logger's print severity.
+// Printf logs a log which has the underlying Logger's print severity.
 func (l *Logger) Printf(format string, args ...interface{}) {
 	if l == nil {
 		return
@@ -255,7 +255,7 @@ func (l *Logger) Printf(format string, args ...interface{}) {
 	l.logf(l.printSeverity, format, args...)
 }
 
-// Println logs a log which has the Logger's print severity.
+// Println logs a log which has the underlying Logger's print severity.
 func (l *Logger) Println(args ...interface{}) {
 	if l == nil {
 		return
@@ -263,8 +263,8 @@ func (l *Logger) Println(args ...interface{}) {
 	l.logln(l.printSeverity, args...)
 }
 
-// SetOutput sets the Logger's output.
-// It returns underlying Logger.
+// SetOutput sets the underlying Logger's output.
+// It returns the underlying Logger.
 func (l *Logger) SetOutput(output Output) *Logger {
 	if l == nil {
 		return nil
@@ -275,9 +275,9 @@ func (l *Logger) SetOutput(output Output) *Logger {
 	return l
 }
 
-// SetSeverity sets the Logger's severity.
+// SetSeverity sets the underlying Logger's severity.
 // If severity is invalid, it sets SeverityInfo.
-// It returns underlying Logger.
+// It returns the underlying Logger.
 func (l *Logger) SetSeverity(severity Severity) *Logger {
 	if l == nil {
 		return nil
@@ -291,8 +291,8 @@ func (l *Logger) SetSeverity(severity Severity) *Logger {
 	return l
 }
 
-// SetVerbose sets the Logger's verbose.
-// It returns underlying Logger.
+// SetVerbose sets the underlying Logger's verbose.
+// It returns the underlying Logger.
 func (l *Logger) SetVerbose(verbose Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -303,9 +303,9 @@ func (l *Logger) SetVerbose(verbose Verbose) *Logger {
 	return l
 }
 
-// SetPrintSeverity sets the Logger's severity level which is using with Print methods.
+// SetPrintSeverity sets the underlying Logger's severity level which is using with Print methods.
 // If printSeverity is invalid, it sets SeverityInfo.
-// It returns underlying Logger.
+// It returns the underlying Logger.
 // By default, SeverityInfo.
 func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
 	if l == nil {
@@ -320,9 +320,9 @@ func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
 	return l
 }
 
-// SetStackTraceSeverity sets the Logger's severity level which saves stack trace into Log.
+// SetStackTraceSeverity sets the underlying Logger's severity level which saves stack trace into Log.
 // If stackTraceSeverity is invalid, it sets SeverityNone.
-// It returns underlying Logger.
+// It returns the underlying Logger.
 // By default, SeverityNone.
 func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	if l == nil {
@@ -337,7 +337,7 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// V clones the Logger with the given verbosity if the Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.
+// V clones the underlying Logger with the given verbosity if the underlying Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.
 func (l *Logger) V(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -351,7 +351,7 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 	return l.WithVerbosity(verbosity)
 }
 
-// WithVerbosity clones the Logger with the given verbosity.
+// WithVerbosity clones the underlying Logger with the given verbosity.
 func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
 	if l == nil {
 		return nil
@@ -361,7 +361,7 @@ func (l *Logger) WithVerbosity(verbosity Verbose) *Logger {
 	return l2
 }
 
-// WithTime clones the Logger with the given time.
+// WithTime clones the underlying Logger with the given time.
 func (l *Logger) WithTime(tm time.Time) *Logger {
 	if l == nil {
 		return nil
@@ -371,7 +371,7 @@ func (l *Logger) WithTime(tm time.Time) *Logger {
 	return l2
 }
 
-// WithoutTime clones the Logger without time.
+// WithoutTime clones the underlying Logger without time.
 func (l *Logger) WithoutTime() *Logger {
 	if l == nil {
 		return nil
@@ -381,7 +381,7 @@ func (l *Logger) WithoutTime() *Logger {
 	return l2
 }
 
-// WithPrefix clones the Logger and adds the given prefix to the end of the underlying prefix.
+// WithPrefix clones the underlying Logger and adds the given prefix to the end of the underlying prefix.
 func (l *Logger) WithPrefix(args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -391,7 +391,7 @@ func (l *Logger) WithPrefix(args ...interface{}) *Logger {
 	return l2
 }
 
-// WithPrefixf clones the Logger and adds the given prefix to the end of the underlying prefix.
+// WithPrefixf clones the underlying Logger and adds the given prefix to the end of the underlying prefix.
 func (l *Logger) WithPrefixf(format string, args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -401,7 +401,7 @@ func (l *Logger) WithPrefixf(format string, args ...interface{}) *Logger {
 	return l2
 }
 
-// WithSuffix clones the Logger and adds the given suffix to the beginning of the underlying suffix.
+// WithSuffix clones the underlying Logger and adds the given suffix to the beginning of the underlying suffix.
 func (l *Logger) WithSuffix(args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -411,7 +411,7 @@ func (l *Logger) WithSuffix(args ...interface{}) *Logger {
 	return l2
 }
 
-// WithSuffixf clones the Logger and adds the given suffix to the beginning of the underlying suffix.
+// WithSuffixf clones the underlying Logger and adds the given suffix to the beginning of the underlying suffix.
 func (l *Logger) WithSuffixf(format string, args ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -421,7 +421,7 @@ func (l *Logger) WithSuffixf(format string, args ...interface{}) *Logger {
 	return l2
 }
 
-// WithFields clones the Logger with given fields.
+// WithFields clones the underlying Logger with given fields.
 func (l *Logger) WithFields(fields ...Field) *Logger {
 	if l == nil {
 		return nil
@@ -431,7 +431,7 @@ func (l *Logger) WithFields(fields ...Field) *Logger {
 	return l2
 }
 
-// WithFieldKeyVals clones the Logger with given keys and values of Field.
+// WithFieldKeyVals clones the underlying Logger with given keys and values of Field.
 func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -446,7 +446,7 @@ func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithFieldMap clones the Logger with the given fieldMap.
+// WithFieldMap clones the underlying Logger with the given fieldMap.
 func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	if l == nil {
 		return nil
@@ -458,7 +458,7 @@ func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithCtxErrVerbosity clones the Logger with context error verbosity.
+// WithCtxErrVerbosity clones the underlying Logger with context error verbosity.
 // If the log has an error and the error is an context error, the given value is used as verbosity.
 func (l *Logger) WithCtxErrVerbosity(verbosity Verbose) *Logger {
 	if l == nil {
