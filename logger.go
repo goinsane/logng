@@ -343,7 +343,7 @@ func (l *Logger) V(verbosity Verbose) *Logger {
 		return nil
 	}
 	l.mu.RLock()
-	if !(l.verbose >= verbosity) {
+	if l.verbose < verbosity {
 		l.mu.RUnlock()
 		return nil
 	}
