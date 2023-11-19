@@ -144,6 +144,7 @@ func (o *JSONOutput) Log(log *Log) {
 
 	b, err = json.Marshal(&data)
 	if err != nil {
+		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
 	b = bytes.TrimLeft(b, "{")
@@ -154,6 +155,7 @@ func (o *JSONOutput) Log(log *Log) {
 		buf.WriteRune(',')
 		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
 		if err != nil {
+			err = fmt.Errorf("unable to marshal field: %w", err)
 			return
 		}
 		b = bytes.TrimLeft(b, "{")
@@ -164,8 +166,9 @@ func (o *JSONOutput) Log(log *Log) {
 	buf.WriteRune('}')
 	buf.WriteRune('\n')
 
-	_, err = o.w.Write(buf.Bytes())
+	_, err = io.Copy(o.w, buf)
 	if err != nil {
+		err = fmt.Errorf("unable to write to writer: %w", err)
 		return
 	}
 }

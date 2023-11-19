@@ -273,8 +273,9 @@ func (o *TextOutput) Log(log *Log) {
 		buf.WriteRune('\n')
 	}
 
-	_, err = o.w.Write(buf.Bytes())
+	_, err = io.Copy(o.w, buf)
 	if err != nil {
+		err = fmt.Errorf("unable to write to writer: %w", err)
 		return
 	}
 }
