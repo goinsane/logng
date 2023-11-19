@@ -173,6 +173,11 @@ func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
 }
 
+// WithoutTime clones the default Logger without time.
+func WithoutTime() *Logger {
+	return defaultLogger.WithoutTime()
+}
+
 // WithPrefix clones the default Logger and adds the given prefix to the end of the underlying prefix.
 func WithPrefix(args ...interface{}) *Logger {
 	return defaultLogger.WithPrefix(args...)
