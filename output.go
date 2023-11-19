@@ -207,7 +207,7 @@ func (o *TextOutput) Log(log *Log) {
 	if o.flags&(TextOutputFlagLongFunc|TextOutputFlagShortFunc) != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
-			fn = trimSrcPath(log.StackCaller.Function)
+			fn = log.StackCaller.Function
 		}
 		if o.flags&TextOutputFlagShortFunc != 0 {
 			fn = trimDirs(fn)
@@ -220,7 +220,7 @@ func (o *TextOutput) Log(log *Log) {
 	if o.flags&(TextOutputFlagLongFile|TextOutputFlagShortFile) != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
-			file = trimSrcPath(log.StackCaller.File)
+			file = log.StackCaller.File
 			if o.flags&TextOutputFlagShortFile != 0 {
 				file = trimDirs(file)
 			}

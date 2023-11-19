@@ -96,7 +96,7 @@ func (o *JSONOutput2) Log(log *Log) {
 	if o.flags&(JSONOutput2FlagLongFunc|JSONOutput2FlagShortFunc) != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
-			fn = trimSrcPath(log.StackCaller.Function)
+			fn = log.StackCaller.Function
 		}
 		if o.flags&JSONOutput2FlagShortFunc != 0 {
 			fn = trimDirs(fn)
@@ -107,7 +107,7 @@ func (o *JSONOutput2) Log(log *Log) {
 	if o.flags&(JSONOutput2FlagLongFile|JSONOutput2FlagShortFile) != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
-			file = trimSrcPath(log.StackCaller.File)
+			file = log.StackCaller.File
 			if o.flags&JSONOutput2FlagShortFile != 0 {
 				file = trimDirs(file)
 			}

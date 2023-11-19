@@ -71,7 +71,7 @@ func (o *JSONOutput) Log(log *Log) {
 	if o.flags&JSONOutputFlagFunc != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
-			fn = trimSrcPath(log.StackCaller.Function)
+			fn = log.StackCaller.Function
 		}
 		data.Func = fn
 	}
@@ -79,7 +79,7 @@ func (o *JSONOutput) Log(log *Log) {
 	if o.flags&JSONOutputFlagFile != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
-			file = trimSrcPath(log.StackCaller.File)
+			file = log.StackCaller.File
 		}
 		if log.StackCaller.Line > 0 {
 			line = log.StackCaller.Line

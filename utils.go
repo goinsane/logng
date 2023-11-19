@@ -2,10 +2,6 @@ package logng
 
 import (
 	"fmt"
-	"go/build"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 // wrappedError is an interface to simulate GoLang's wrapped errors.
@@ -26,35 +22,6 @@ func itoa(buf *[]byte, i int, wid int) {
 	}
 	b[bp] = byte('0' + i)
 	*buf = append(*buf, b[bp:]...)
-}
-
-var (
-	goRootSrcPath = filepath.ToSlash(
-		filepath.Join(build.Default.GOROOT, "src") + string(os.PathSeparator),
-	)
-	goSrcPath = filepath.ToSlash(
-		filepath.Join(build.Default.GOPATH, "src") + string(os.PathSeparator),
-	)
-	goPkgModPath = filepath.ToSlash(
-		filepath.Join(build.Default.GOPATH, "pkg", "mod") + string(os.PathSeparator),
-	)
-)
-
-func trimSrcPath(s string) string {
-	var r string
-	r = strings.TrimPrefix(s, goRootSrcPath)
-	if r != s {
-		return r
-	}
-	r = strings.TrimPrefix(s, goSrcPath)
-	if r != s {
-		return r
-	}
-	r = strings.TrimPrefix(s, goPkgModPath)
-	if r != s {
-		return r
-	}
-	return s
 }
 
 func trimDirs(s string) string {

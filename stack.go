@@ -61,7 +61,7 @@ func (c StackCaller) Format(f fmt.State, verb rune) {
 		buf.Write(indent)
 		file, line := "???", 0
 		if c.File != "" {
-			file = trimSrcPath(c.File)
+			file = c.File
 			if f.Flag('#') {
 				file = trimDirs(file)
 			}
