@@ -290,7 +290,6 @@ func (o *TextOutput) SetWriter(w io.Writer) *TextOutput {
 
 // SetFlags sets flags to override every single Log.Flags if argument flags is different from 0.
 // It returns the underlying TextOutput.
-// By default, 0.
 func (o *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()

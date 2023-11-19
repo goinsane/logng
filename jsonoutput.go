@@ -181,7 +181,6 @@ func (o *JSONOutput) SetWriter(w io.Writer) *JSONOutput {
 
 // SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
 // It returns the underlying JSONOutput.
-// By default, 0.
 func (o *JSONOutput) SetFlags(flags JSONOutputFlag) *JSONOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()
