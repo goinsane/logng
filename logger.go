@@ -18,7 +18,7 @@ type Logger struct {
 	printSeverity      Severity
 	stackTraceSeverity Severity
 	verbosity          Verbose
-	time               time.Time
+	time               *time.Time
 	prefix             string
 	suffix             string
 	fields             Fields
@@ -53,11 +53,15 @@ func (l *Logger) Clone() *Logger {
 		printSeverity:      l.printSeverity,
 		stackTraceSeverity: l.stackTraceSeverity,
 		verbosity:          l.verbosity,
-		time:               l.time,
+		time:               nil,
 		prefix:             l.prefix,
 		suffix:             l.suffix,
 		fields:             l.fields.Clone(),
 		ctxErrVerbosity:    l.ctxErrVerbosity,
+	}
+	if l.time != nil {
+		tm := *l.time
+		l2.time = &tm
 	}
 	return l2
 }
@@ -66,37 +70,64 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	if l == nil {
 		return
 	}
+
 	l.mu.RLock()
 	defer l.mu.RUnlock()
-	if (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) &&
-		!(l.verbose >= l.ctxErrVerbosity) {
+
+	if l.output == nil {
 		return
 	}
-	if l.output != nil && l.severity >= severity && l.verbose >= l.verbosity {
-		messageLen := len(l.prefix) + len(message) + len(l.suffix)
-		log := &Log{
-			Message:   make([]byte, 0, messageLen),
-			Error:     err,
-			Severity:  severity,
-			Verbosity: l.verbosity,
-			Time:      l.time,
-			Fields:    l.fields.Clone(),
-		}
-		log.Message = append(log.Message, l.prefix...)
-		log.Message = append(log.Message, message...)
-		log.Message = append(log.Message, l.suffix...)
-		if messageLen != 0 && log.Message[messageLen-1] == '\n' {
-			log.Message = log.Message[:messageLen-1]
-		}
-		if log.Time.IsZero() {
-			log.Time = time.Now()
-		}
-		log.StackCaller = NewStackTrace(ProgramCounters(1, 5)).Caller(0)
-		if l.stackTraceSeverity >= severity {
-			log.StackTrace = NewStackTrace(ProgramCounters(64, 5))
-		}
-		l.output.Log(log)
+	if l.severity < severity {
+		return
 	}
+	if l.verbose < l.verbosity {
+		return
+	}
+	if (errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) && l.verbose < l.ctxErrVerbosity {
+		return
+	}
+
+	messageLen := len(l.prefix) + len(message) + len(l.suffix)
+
+	log := &Log{
+		Message:   make([]byte, 0, messageLen),
+		Error:     err,
+		Severity:  severity,
+		Verbosity: l.verbosity,
+		Fields:    l.fields.Clone(),
+	}
+
+	log.Message = append(log.Message, l.prefix...)
+	log.Message = append(log.Message, message...)
+	log.Message = append(log.Message, l.suffix...)
+	if messageLen > 0 && log.Message[messageLen-1] == '\n' {
+		log.Message = log.Message[:messageLen-1]
+	}
+
+	if l.time != nil {
+		log.Time = *l.time
+	} else {
+		log.Time = time.Now()
+	}
+
+	includeStackTrace := l.stackTraceSeverity >= severity
+
+	pcSize := 1
+	if includeStackTrace {
+		pcSize = 64
+	}
+	pc := ProgramCounters(pcSize, 5)
+	st := NewStackTrace(pc)
+
+	if st.SizeOfCallers() > 0 {
+		log.StackCaller = st.Caller(0)
+	}
+
+	if includeStackTrace {
+		log.StackTrace = st
+	}
+
+	l.output.Log(log)
 }
 
 func (l *Logger) log(severity Severity, args ...interface{}) {
@@ -336,7 +367,17 @@ func (l *Logger) WithTime(tm time.Time) *Logger {
 		return nil
 	}
 	l2 := l.Clone()
-	l2.time = tm
+	l2.time = &tm
+	return l2
+}
+
+// WithoutTime clones the Logger without time.
+func (l *Logger) WithoutTime() *Logger {
+	if l == nil {
+		return nil
+	}
+	l2 := l.Clone()
+	l2.time = nil
 	return l2
 }
 
