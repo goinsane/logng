@@ -2,12 +2,10 @@ package logng
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
-	"time"
 	"unsafe"
 )
 
@@ -107,21 +105,6 @@ func (q *QueuedOutput) SetBlocking(blocking bool) *QueuedOutput {
 func (q *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&q.onQueueFull)), unsafe.Pointer(&f))
 	return q
-}
-
-// WaitForEmpty waits until the queue is empty by the given context.
-func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
-	for ctx.Err() == nil {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(50 * time.Millisecond):
-			if len(q.queue) == 0 {
-				return nil
-			}
-		}
-	}
-	return ctx.Err()
 }
 
 func (q *QueuedOutput) worker() {
