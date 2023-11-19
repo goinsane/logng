@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/goinsane/logng"
+	"github.com/goinsane/logng/v2"
 )
 
 var (
