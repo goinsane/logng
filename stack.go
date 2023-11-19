@@ -111,8 +111,8 @@ func (t *StackTrace) Clone() *StackTrace {
 		return nil
 	}
 	t2 := &StackTrace{
-		programCounters: make([]uintptr, len(t.programCounters), cap(t.programCounters)),
-		callers:         make([]StackCaller, len(t.callers), cap(t.callers)),
+		programCounters: make([]uintptr, len(t.programCounters)),
+		callers:         make([]StackCaller, len(t.callers)),
 	}
 	copy(t2.programCounters, t.programCounters)
 	copy(t2.callers, t.callers)
