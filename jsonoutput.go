@@ -119,8 +119,12 @@ func (o *JSONOutput) Log(log *Log) {
 		data.File = &x
 	}
 
-	if o.flags&JSONOutputFlagStackTrace != 0 && log.StackTrace != nil {
-		x := fmt.Sprintf("%+.1s", log.StackTrace)
+	if o.flags&(JSONOutputFlagStackTrace|JSONOutputFlagStackTraceShortFile) != 0 && log.StackTrace != nil {
+		f := "%+.1s"
+		if o.flags&JSONOutputFlagStackTraceShortFile != 0 {
+			f = "%+#.1s"
+		}
+		x := fmt.Sprintf(f, log.StackTrace)
 		data.StackTrace = &x
 	}
 
@@ -234,8 +238,10 @@ const (
 
 	JSONOutputFlagStackTrace
 
+	JSONOutputFlagStackTraceShortFile
+
 	JSONOutputFlagFields
 
 	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLongFunc |
-		JSONOutputFlagShortFile | JSONOutputFlagStackTrace | JSONOutputFlagFields
+		JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
 )

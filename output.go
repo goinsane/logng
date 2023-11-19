@@ -266,9 +266,13 @@ func (o *TextOutput) Log(log *Log) {
 		buf.WriteRune('\n')
 	}
 
-	if o.flags&TextOutputFlagStackTrace != 0 && log.StackTrace != nil {
+	if o.flags&(TextOutputFlagStackTrace|TextOutputFlagStackTraceShortFile) != 0 && log.StackTrace != nil {
 		extend()
-		buf.WriteString(fmt.Sprintf("%+1.1s", log.StackTrace))
+		f := "%+1.1s"
+		if o.flags&TextOutputFlagStackTraceShortFile != 0 {
+			f = "%+#1.1s"
+		}
+		buf.WriteString(fmt.Sprintf(f, log.StackTrace))
 		buf.WriteString("\n\t")
 		buf.WriteRune('\n')
 	}
@@ -346,6 +350,10 @@ const (
 	// TextOutputFlagStackTrace prints the stack trace if there is
 	TextOutputFlagStackTrace
 
+	// TextOutputFlagStackTraceShortFile prints the stack trace with final file name if there is
+	TextOutputFlagStackTraceShortFile
+
 	// TextOutputFlagDefault holds initial flags for the Logger
-	TextOutputFlagDefault = TextOutputFlagDate | TextOutputFlagTime | TextOutputFlagSeverity | TextOutputFlagPadding | TextOutputFlagFields | TextOutputFlagStackTrace
+	TextOutputFlagDefault = TextOutputFlagDate | TextOutputFlagTime | TextOutputFlagSeverity |
+		TextOutputFlagPadding | TextOutputFlagFields
 )
