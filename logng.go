@@ -4,16 +4,8 @@ package logng
 import (
 	"io"
 	"os"
-	"runtime"
 	"time"
 )
-
-// ProgramCounters returns program counters by using runtime.Callers.
-func ProgramCounters(size, skip int) []uintptr {
-	programCounter := make([]uintptr, size)
-	programCounter = programCounter[:runtime.Callers(skip, programCounter)]
-	return programCounter
-}
 
 // Reset resets the default Logger and the default TextOutput.
 func Reset() {
