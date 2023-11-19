@@ -44,15 +44,14 @@ func (o *JSONOutput) Log(log *Log) {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
 	var data struct {
-		Time           time.Time         `json:"time"`
-		SeverityString string            `json:"severity,omitempty"`
-		Message        string            `json:"message"`
-		Severity       int               `json:"s"`
-		Verbosity      int               `json:"v"`
-		Func           string            `json:"func,omitempty"`
-		File           string            `json:"file,omitempty"`
-		StackTrace     string            `json:"stack_trace,omitempty"`
-		Fields         map[string]string `json:"-"`
+		Time           time.Time `json:"time"`
+		SeverityString string    `json:"severity,omitempty"`
+		Message        string    `json:"message"`
+		Severity       int       `json:"s"`
+		Verbosity      int       `json:"v"`
+		Func           string    `json:"func,omitempty"`
+		File           string    `json:"file,omitempty"`
+		StackTrace     string    `json:"stack_trace,omitempty"`
 	}
 
 	data.Time = log.Time
@@ -91,18 +90,22 @@ func (o *JSONOutput) Log(log *Log) {
 		data.StackTrace = fmt.Sprintf("%+.1s", log.StackTrace)
 	}
 
+	fieldsKvs := make([]string, 0, 2*len(log.Fields))
 	if o.flags&JSONOutputFlagFields != 0 {
-		data.Fields = make(map[string]string, 4096)
+		fieldsMap := make(map[string]string, len(log.Fields))
 		for idx, field := range log.Fields {
 			key := fmt.Sprintf("_%s", field.Key)
-			if _, ok := data.Fields[key]; ok {
+			if _, ok := fieldsMap[key]; ok {
 				key = fmt.Sprintf("%d_%s", idx, field.Key)
 			}
-			data.Fields[key] = fmt.Sprintf("%v", field.Value)
+			val := fmt.Sprintf("%v", field.Value)
+			fieldsMap[key] = val
+			fieldsKvs = append(fieldsKvs, key, val)
 		}
 	}
 
 	buf.WriteRune('{')
+
 	var b []byte
 
 	b, err = json.Marshal(&data)
@@ -113,9 +116,9 @@ func (o *JSONOutput) Log(log *Log) {
 	b = bytes.TrimRight(b, "}")
 	buf.Write(b)
 
-	if len(data.Fields) > 0 {
+	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
 		buf.WriteRune(',')
-		b, err = json.Marshal(data.Fields)
+		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
 		if err != nil {
 			return
 		}
