@@ -300,6 +300,25 @@ func BenchmarkInfo_withTextOutputFlagShortFile(b *testing.B) {
 	}
 }
 
+func BenchmarkInfo_withJSONOutput(b *testing.B) {
+	logng.Reset()
+	logng.SetOutput(logng.NewJSONOutput(io.Discard, logng.JSONOutputFlagDefault))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withJSONOutput_withStackTrace(b *testing.B) {
+	logng.Reset()
+	logng.SetOutput(logng.NewJSONOutput(io.Discard, logng.JSONOutputFlagDefault))
+	logng.SetStackTraceSeverity(logng.SeverityInfo)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
 func BenchmarkV(b *testing.B) {
 	logng.Reset()
 	logng.SetVerbose(1)
