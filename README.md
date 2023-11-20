@@ -15,6 +15,7 @@
 - Function and file logging
 - Stack trace
 - Field support
+- Performance optimized
 
 ## Installation
 
