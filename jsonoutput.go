@@ -43,8 +43,6 @@ func (o *JSONOutput) Log(log *Log) {
 	o.mu.RLock()
 	defer o.mu.RUnlock()
 
-	buf := bytes.NewBuffer(make([]byte, 0, 4096))
-
 	var data struct {
 		Severity      *string `json:"severity,omitempty"`
 		Message       string  `json:"message"`
@@ -142,8 +140,6 @@ func (o *JSONOutput) Log(log *Log) {
 		}
 	}
 
-	buf.WriteRune('{')
-
 	var b []byte
 
 	b, err = json.Marshal(&data)
@@ -151,9 +147,7 @@ func (o *JSONOutput) Log(log *Log) {
 		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
-	b = bytes.TrimLeft(b, "{")
-	b = bytes.TrimRight(b, "}")
-	buf.Write(b)
+	buf := bytes.NewBuffer(bytes.TrimRight(b, "}"))
 
 	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
 		buf.WriteRune(',')
