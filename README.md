@@ -36,12 +36,12 @@ import (
 
 func main() {
 	// log by severity and verbosity.
-	// default severity is SeverityInfo.
-	// default verbose is 0.
-	logng.Debug("this is debug log. but it won't be shown.")
+	// default Logger's severity is SeverityInfo.
+	// default Logger's verbose is 0.
+	logng.Debug("this is debug log. it won't be shown.")
 	logng.Info("this is info log.")
 	logng.Warning("this is warning log.")
-	logng.V(1).Error("this is error log, verbosity 1. but it won't be shown.")
+	logng.V(1).Error("this is error log, verbosity 1. it won't be shown.")
 }
 ```
 

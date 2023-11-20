@@ -9,30 +9,19 @@ import (
 	"github.com/goinsane/logng/v2"
 )
 
-var (
-	testTime, _ = time.ParseInLocation("2006-01-02T15:04:05", "2010-11-12T13:14:15", time.Local)
-)
-
-// resetForTest resets logng to run new test.
-func resetForTest() {
-	logng.Reset()
-	logng.SetTextOutputFlags(logng.TextOutputFlagDefault & ^logng.TextOutputFlagDate & ^logng.TextOutputFlagTime & ^logng.TextOutputFlagStackTrace)
-	logng.SetTextOutputWriter(os.Stdout)
-}
-
 func Example() {
-	// reset logng for previous changes if it is running in go test.
+	// reset logng for previous changes.
 	logng.Reset()
 	// change writer of default output to stdout from stderr.
 	logng.SetTextOutputWriter(os.Stdout)
 
-	// log by Severity.
-	// default severity is SeverityInfo.
-	// default verbose is 0.
-	logng.Debug("this is debug log. but it won't be shown.")
+	// log by severity and verbosity.
+	// default Logger's severity is SeverityInfo.
+	// default Logger's verbose is 0.
+	logng.Debug("this is debug log. it won't be shown.")
 	logng.Info("this is info log.")
 	logng.Warning("this is warning log.")
-	logng.V(1).Error("this is error log, verbosity 1. but it won't be shown.")
+	logng.V(1).Error("this is error log, verbosity 1. it won't be shown.")
 
 	// SetSeverity()
 	logng.SetSeverity(logng.SeverityDebug)
@@ -75,12 +64,12 @@ func Example() {
 }
 
 func Example_test1() {
-	// reset logng for previous changes if it is running in go test.
+	// reset logng for previous changes.
 	logng.Reset()
-	// just show severity.
-	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
 	// change writer of default output to stdout from stderr.
 	logng.SetTextOutputWriter(os.Stdout)
+	// just show severity.
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
 
 	logng.Debug("this is debug log, verbosity 0. it will not be shown.")
 	logng.Info("this is info log, verbosity 0.")
@@ -125,82 +114,103 @@ func Example_test1() {
 }
 
 func ExampleSetSeverity() {
-	resetForTest()
-	logng.SetSeverity(logng.SeverityDebug)
-	logng.Debug("this is debug log, verbosity 0.")
-	logng.Info("this is info log, verbosity 0.")
-	logng.Warning("this is warning log, verbosity 0.")
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
+
+	logng.SetSeverity(logng.SeverityWarning)
+	logng.Debug("this is debug log.")
+	logng.Info("this is info log.")
+	logng.Warning("this is warning log.")
+	logng.Error("this is error log.")
 
 	// Output:
-	// DEBUG - this is debug log, verbosity 0.
-	// INFO - this is info log, verbosity 0.
-	// WARNING - this is warning log, verbosity 0.
+	// WARNING - this is warning log.
+	// ERROR - this is error log.
 }
 
 func ExampleSetVerbose() {
-	resetForTest()
-	logng.SetVerbose(2)
-	logng.V(0).Debug("this is debug log, verbosity 0. it won't be shown.")
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
+
+	logng.SetVerbose(1)
+	logng.V(0).Info("this is info log, verbosity 0.")
 	logng.V(1).Info("this is info log, verbosity 1.")
-	logng.V(2).Warning("this is warning log, verbosity 2.")
-	logng.V(3).Error("this is error log, verbosity 3. it won't be shown.")
+	logng.V(2).Info("this is info log, verbosity 2. it won't be shown.")
+	logng.V(3).Info("this is info log, verbosity 3. it won't be shown.")
 
 	// Output:
+	// INFO - this is info log, verbosity 0.
 	// INFO - this is info log, verbosity 1.
-	// WARNING - this is warning log, verbosity 2.
 }
 
-func ExampleSetTextOutputFlags() {
-	resetForTest()
-	logng.SetTextOutputFlags(0)
-	logng.Info("this is info log, verbosity 0.")
+func ExampleSetPrintSeverity() {
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
+
+	logng.SetPrintSeverity(logng.SeverityWarning)
+	logng.Print("this is the log.")
 
 	// Output:
-	// this is info log, verbosity 0.
+	// WARNING - this is the log.
 }
 
 func ExampleWithTime() {
-	resetForTest()
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
 	logng.SetTextOutputFlags(logng.TextOutputFlagDefault)
-	logng.WithTime(testTime).Info("this is info log, verbosity 0.")
+
+	logng.WithTime(testTime).Info("this is info log with the given time.")
 
 	// Output:
-	// 2010/11/12 13:14:15 INFO - this is info log, verbosity 0.
+	// 2010/11/12 13:14:15 INFO - this is info log with the given time.
 }
 
 func ExampleWithPrefix() {
-	resetForTest()
-	logng.SetTextOutputFlags(0)
-	logng.WithPrefix("APP1: ").WithPrefix("APP2: ").Info("this is info log, verbosity 0.")
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
+
+	logng.WithPrefix("prefix1: ").WithPrefix("prefix2: ").Info("this is info log.")
 
 	// Output:
-	// APP1: APP2: this is info log, verbosity 0.
+	// INFO - prefix1: prefix2: this is info log.
 }
 
 func ExampleWithSuffix() {
-	resetForTest()
-	logng.SetTextOutputFlags(0)
-	logng.WithSuffix(" *").WithSuffix(" +").Info("this is info log, verbosity 0.")
+	// set logng for this example.
+	logng.Reset()
+	logng.SetTextOutputWriter(os.Stdout)
+	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
+
+	logng.WithSuffix(" :suffix1").WithSuffix(" :suffix2").Info("this is info log.")
 
 	// Output:
-	// this is info log, verbosity 0. + *
+	// INFO - this is info log. :suffix2 :suffix1
 }
 
 func ExampleLogger() {
-	logger := logng.NewLogger(logng.NewTextOutput(os.Stdout, logng.TextOutputFlagSeverity), logng.SeverityInfo, 2)
+	logger := logng.NewLogger(logng.NewTextOutput(os.Stdout, logng.TextOutputFlagSeverity),
+		logng.SeverityInfo, 2)
 
-	logger.Info("this is info log, verbosity 0.")
-	logger.V(0).Info("this is info log, verbosity 0.")
-	logger.V(1).Warning("this is warning log, verbosity 1.")
-	logger.V(2).Error("this is error log, verbosity 2.")
-	logger.V(3).Error("this is error log, verbosity 3. it won't be shown.")
 	logger.Debug("this is debug log, verbosity 0. it won't be shown.")
+	logger.Info("this is info log, verbosity 0.")
+	logger.V(0).Debug("this is debug log, verbosity 0. it won't be shown.")
+	logger.V(1).Info("this is info log, verbosity 1.")
+	logger.V(2).Warning("this is warning log, verbosity 2.")
+	logger.V(3).Error("this is error log, verbosity 3. it won't be shown.")
 
 	// Output:
 	// INFO - this is info log, verbosity 0.
-	// INFO - this is info log, verbosity 0.
-	// WARNING - this is warning log, verbosity 1.
-	// ERROR - this is error log, verbosity 2.
+	// INFO - this is info log, verbosity 1.
+	// WARNING - this is warning log, verbosity 2.
 }
 
 func BenchmarkLogger_Info(b *testing.B) {
@@ -307,3 +317,7 @@ func BenchmarkLogger_WithFieldKeyVals(b *testing.B) {
 		logger.WithFieldKeyVals("key1", "value1")
 	}
 }
+
+var (
+	testTime, _ = time.ParseInLocation("2006-01-02T15:04:05", "2010-11-12T13:14:15", time.Local)
+)
