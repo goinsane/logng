@@ -446,7 +446,7 @@ func (l *Logger) WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return l.WithFields(fields...)
 }
 
-// WithFieldMap clones the underlying Logger with the given fieldMap.
+// WithFieldMap clones the underlying Logger with the given field map.
 func (l *Logger) WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	if l == nil {
 		return nil

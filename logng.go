@@ -208,7 +208,7 @@ func WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return defaultLogger.WithFieldKeyVals(kvs...)
 }
 
-// WithFieldMap clones the default Logger with the given fieldMap.
+// WithFieldMap clones the default Logger with the given field map.
 func WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return defaultLogger.WithFieldMap(fieldMap)
 }
