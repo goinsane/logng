@@ -4,11 +4,11 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=goinsane_logng&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=goinsane_logng)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=goinsane_logng&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=goinsane_logng)
 
-**logng** is a Go (Golang) package that provides leveled and structured logging.
+**logng** is a Go (Golang) package that provides structured and leveled logging.
 
 ## Features
 
-- Structured logging: FATAL, ERROR, WARNING, INFO, DEBUG
+- Leveled logging: FATAL, ERROR, WARNING, INFO, DEBUG
 - Verbose support
 - Text and JSON output
 - Customizable output
