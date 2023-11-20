@@ -10,7 +10,7 @@ import (
 )
 
 // Output is an interface for Logger output.
-// All the Output implementations must be safe for concurrency.
+// All of Output implementations must be safe for concurrency.
 type Output interface {
 	Log(log *Log)
 }
