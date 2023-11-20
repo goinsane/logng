@@ -61,6 +61,16 @@ func Example() {
 
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
+
+	// SetTextOutputFlags()
+	// default flags is TextOutputFlagDefault.
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
+	logng.Info("this is info log. you can see file name and line in this log.")
+
+	// multi-line logs
+	logng.Info("this is\nmulti-line log with file name")
+	logng.Info("this is\nmulti-line log")
+	logng.WithFieldKeyVals("key1", "val1").Info("this is\nmulti-line log with key vals")
 }
 
 func Example_test1() {
