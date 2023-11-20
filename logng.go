@@ -27,6 +27,11 @@ func DefaultLogger() *Logger {
 	return defaultLogger
 }
 
+// Clone clones the default Logger.
+func Clone() *Logger {
+	return defaultLogger.Clone()
+}
+
 // Fatal logs to the FATAL severity logs to the default Logger, then calls os.Exit(1).
 func Fatal(args ...interface{}) {
 	defaultLogger.log(SeverityFatal, args...)

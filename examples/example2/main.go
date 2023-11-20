@@ -12,9 +12,6 @@ var (
 )
 
 func main() {
-	// reset logng for previous changes if it is running in go test.
-	logng.Reset()
-
 	// set JSONOutput.
 	output := logng.NewJSONOutput(os.Stdout, logng.JSONOutputFlagDefault)
 	logng.SetOutput(output)

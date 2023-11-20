@@ -61,6 +61,16 @@ func Example() {
 
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
+
+	// SetTextOutputFlags()
+	// default flags is TextOutputFlagDefault.
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
+	logng.Info("this is info log. you can see file name and line in this log.")
+
+	// multi-line logs
+	logng.Info("this is\nmulti-line log with file name")
+	logng.Info("this is\nmulti-line log")
+	logng.WithFieldKeyVals("key1", "val1").Info("this is\nmulti-line log with key vals")
 }
 
 func Example_test1() {
@@ -213,32 +223,153 @@ func ExampleLogger() {
 	// WARNING - this is warning log, verbosity 2.
 }
 
+func BenchmarkInfo(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfof(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Infof("%s", "benchmark")
+	}
+}
+
+func BenchmarkInfoln(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Infoln("benchmark")
+	}
+}
+
+func BenchmarkInfo_withStackTrace(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	logng.SetStackTraceSeverity(logng.SeverityInfo)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withTextOutputFlagLongFunc(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagLongFunc)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withTextOutputFlagShortFunc(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFunc)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withFlagLongFile(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagLongFile)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withTextOutputFlagShortFile(b *testing.B) {
+	logng.Reset()
+	logng.SetTextOutputWriter(io.Discard)
+	logng.SetTextOutputFlags(logng.TextOutputFlagDefault | logng.TextOutputFlagShortFile)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withJSONOutput(b *testing.B) {
+	logng.Reset()
+	logng.SetOutput(logng.NewJSONOutput(io.Discard, logng.JSONOutputFlagDefault))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkInfo_withJSONOutput_withStackTrace(b *testing.B) {
+	logng.Reset()
+	logng.SetOutput(logng.NewJSONOutput(io.Discard, logng.JSONOutputFlagDefault))
+	logng.SetStackTraceSeverity(logng.SeverityInfo)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.Info("benchmark")
+	}
+}
+
+func BenchmarkV(b *testing.B) {
+	logng.Reset()
+	logng.SetVerbose(1)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.V(1)
+	}
+}
+
+func BenchmarkWithTime(b *testing.B) {
+	logng.Reset()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.WithTime(testTime)
+	}
+}
+
+func BenchmarkWithPrefix(b *testing.B) {
+	logng.Reset()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.WithPrefix("prefix")
+	}
+}
+
+func BenchmarkWithPrefixf(b *testing.B) {
+	logng.Reset()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.WithPrefixf("%s", "prefix")
+	}
+}
+
+func BenchmarkWithFieldKeyVals(b *testing.B) {
+	logng.Reset()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logng.WithFieldKeyVals("key1", "value1")
+	}
+}
+
 func BenchmarkLogger_Info(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(nopOutput{}, logng.SeverityInfo, 0)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		logger.Info("benchmark")
 	}
 }
 
-func BenchmarkLogger_Infof(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Infof("%s", "benchmark")
-	}
-}
-
-func BenchmarkLogger_Infoln(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Infoln("benchmark")
-	}
-}
-
 func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
+	logger := logng.NewLogger(nopOutput{}, logng.SeverityInfo, 0)
 	logger.SetStackTraceSeverity(logng.SeverityInfo)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -246,77 +377,9 @@ func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
 	}
 }
 
-func BenchmarkLogger_Info_withTextOutputFlagLongFunc(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFunc), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Info("benchmark")
-	}
-}
+type nopOutput struct{}
 
-func BenchmarkLogger_Info_withTextOutputFlagShortFunc(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFunc), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Info("benchmark")
-	}
-}
-
-func BenchmarkLogger_Info_withFlagLongFile(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagLongFile), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Info("benchmark")
-	}
-}
-
-func BenchmarkLogger_Info_withTextOutputFlagShortFile(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, logng.TextOutputFlagDefault|logng.TextOutputFlagShortFile), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.Info("benchmark")
-	}
-}
-
-func BenchmarkLogger_V(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 5)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.V(1)
-	}
-}
-
-func BenchmarkLogger_WithTime(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.WithTime(testTime)
-	}
-}
-
-func BenchmarkLogger_WithPrefix(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.WithPrefix("prefix")
-	}
-}
-
-func BenchmarkLogger_WithPrefixf(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.WithPrefixf("%s", "prefix")
-	}
-}
-
-func BenchmarkLogger_WithFieldKeyVals(b *testing.B) {
-	logger := logng.NewLogger(logng.NewTextOutput(io.Discard, 0), logng.SeverityInfo, 0)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		logger.WithFieldKeyVals("key1", "value1")
-	}
-}
+func (nopOutput) Log(*logng.Log) {}
 
 var (
 	testTime, _ = time.ParseInLocation("2006-01-02T15:04:05", "2010-11-12T13:14:15", time.Local)

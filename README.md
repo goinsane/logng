@@ -42,7 +42,17 @@ func main() {
 	logng.Info("this is info log.")
 	logng.Warning("this is warning log.")
 	logng.V(1).Error("this is error log, verbosity 1. it won't be shown.")
+
+	// set stack trace severity
+	logng.SetStackTraceSeverity(logng.SeverityWarning)
+
+	// log with fields
+	logng.WithFieldKeyVals("user_name", "john", "ip", "1.2.3.4").Info("connected.")
+
+	// logs with stack trace, because the log severity is error
+	logng.Error("an error")
 }
+
 ```
 
 To run any example, please use the command like the following:
