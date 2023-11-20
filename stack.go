@@ -6,19 +6,19 @@ import (
 	"runtime"
 )
 
-// StackCaller stores the information of stack caller.
-// StackCaller can format given information as string by using String or Format methods.
+// StackCaller stores the information of the stack caller.
+// StackCaller can format the given information as string by using String or Format methods.
 type StackCaller struct {
 	runtime.Frame
 }
 
-// String is implementation of fmt.Stringer.
+// String is the implementation of fmt.Stringer.
 // It is synonym with fmt.Sprintf("%s", c).
 func (c StackCaller) String() string {
 	return fmt.Sprintf("%s", c)
 }
 
-// Format is implementation of fmt.Formatter.
+// Format is the implementation of fmt.Formatter.
 //
 // For '%s' (also '%v'):
 //
@@ -61,7 +61,7 @@ func (c StackCaller) Format(f fmt.State, verb rune) {
 		buf.Write(indent)
 		file, line := "???", 0
 		if c.File != "" {
-			file = trimSrcPath(c.File)
+			file = c.File
 			if f.Flag('#') {
 				file = trimDirs(file)
 			}
@@ -76,13 +76,13 @@ func (c StackCaller) Format(f fmt.State, verb rune) {
 	_, _ = f.Write(buf.Bytes())
 }
 
-// StackTrace stores the information of stack trace.
+// StackTrace stores the information of the stack trace.
 type StackTrace struct {
 	programCounters []uintptr
 	callers         []StackCaller
 }
 
-// NewStackTrace creates a new StackTrace object.
+// NewStackTrace creates a new StackTrace.
 func NewStackTrace(programCounters []uintptr) *StackTrace {
 	t := &StackTrace{
 		programCounters: make([]uintptr, len(programCounters)),
@@ -105,28 +105,28 @@ func NewStackTrace(programCounters []uintptr) *StackTrace {
 	return t
 }
 
-// Clone clones the StackTrace object.
+// Clone clones the underlying StackTrace.
 func (t *StackTrace) Clone() *StackTrace {
 	if t == nil {
 		return nil
 	}
 	t2 := &StackTrace{
-		programCounters: make([]uintptr, len(t.programCounters), cap(t.programCounters)),
-		callers:         make([]StackCaller, len(t.callers), cap(t.callers)),
+		programCounters: make([]uintptr, len(t.programCounters)),
+		callers:         make([]StackCaller, len(t.callers)),
 	}
 	copy(t2.programCounters, t.programCounters)
 	copy(t2.callers, t.callers)
 	return t2
 }
 
-// String is implementation of fmt.Stringer.
+// String is the implementation of fmt.Stringer.
 // It is synonym with fmt.Sprintf("%s", t).
 func (t *StackTrace) String() string {
 	return fmt.Sprintf("%s", t)
 }
 
-// Format is implementation of fmt.Formatter.
-// Format lists all StackCaller's in StackTrace line by line with given format.
+// Format is the implementation of fmt.Formatter.
+// Format lists all StackCaller's in the underlying StackTrace line by line with the given format.
 func (t *StackTrace) Format(f fmt.State, verb rune) {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 	switch verb {
@@ -163,22 +163,29 @@ func (t *StackTrace) SizeOfProgramCounters() int {
 	return len(t.programCounters)
 }
 
-// Callers returns callers.
+// Callers returns StackCaller's.
 func (t *StackTrace) Callers() []StackCaller {
 	result := make([]StackCaller, len(t.callers))
 	copy(result, t.callers)
 	return result
 }
 
-// SizeOfCallers returns the size of all callers.
+// SizeOfCallers returns the size of StackCaller's.
 func (t *StackTrace) SizeOfCallers() int {
 	return len(t.callers)
 }
 
 // Caller returns a caller on the given index. It panics if index is out of range.
 func (t *StackTrace) Caller(index int) StackCaller {
-	if index < 0 || index >= len(t.callers) {
+	if 0 > index || index >= len(t.callers) {
 		panic("index out of range")
 	}
 	return t.callers[index]
+}
+
+// ProgramCounters returns program counters by using runtime.Callers.
+func ProgramCounters(size, skip int) []uintptr {
+	programCounter := make([]uintptr, size)
+	programCounter = programCounter[:runtime.Callers(skip, programCounter)]
+	return programCounter
 }

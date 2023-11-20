@@ -13,17 +13,19 @@ import (
 
 // JSONOutput is an implementation of Output by writing json to io.Writer w.
 type JSONOutput struct {
-	mu      sync.Mutex
-	w       io.Writer
-	flags   JSONOutputFlag
-	onError *func(error)
+	mu         sync.Mutex
+	w          io.Writer
+	flags      JSONOutputFlag
+	onError    *func(error)
+	timeLayout string
 }
 
 // NewJSONOutput creates a new JSONOutput.
 func NewJSONOutput(w io.Writer, flags JSONOutputFlag) *JSONOutput {
 	return &JSONOutput{
-		w:     w,
-		flags: flags,
+		w:          w,
+		flags:      flags,
+		timeLayout: time.RFC3339Nano,
 	}
 }
 
@@ -44,79 +46,120 @@ func (o *JSONOutput) Log(log *Log) {
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
 	var data struct {
-		Time           time.Time         `json:"time"`
-		SeverityString string            `json:"severity,omitempty"`
-		Message        string            `json:"message"`
-		Severity       int               `json:"s"`
-		Verbosity      int               `json:"v"`
-		Func           string            `json:"func,omitempty"`
-		File           string            `json:"file,omitempty"`
-		StackTrace     string            `json:"stack_trace,omitempty"`
-		Fields         map[string]string `json:"-"`
+		Severity      *string `json:"severity,omitempty"`
+		Message       string  `json:"message"`
+		Time          *string `json:"time,omitempty"`
+		Timestamp     *int64  `json:"timestamp,omitempty"`
+		SeverityLevel *int    `json:"severity_level,omitempty"`
+		Verbosity     *int    `json:"verbosity,omitempty"`
+		Func          *string `json:"func,omitempty"`
+		File          *string `json:"file,omitempty"`
+		StackTrace    *string `json:"stack_trace,omitempty"`
 	}
-
-	data.Time = log.Time
 	data.Message = string(log.Message)
-	data.Severity = int(log.Severity)
-	data.Verbosity = int(log.Verbosity)
-
-	if o.flags&JSONOutputFlagUTC != 0 {
-		data.Time = data.Time.UTC()
-	}
 
 	if o.flags&JSONOutputFlagSeverity != 0 {
-		data.SeverityString = log.Severity.String()
+		x := log.Severity.String()
+		data.Severity = &x
 	}
 
-	if o.flags&JSONOutputFlagFunc != 0 {
+	if o.flags&(JSONOutputFlagTime|JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+		tm := log.Time
+		if o.flags&JSONOutputFlagUTC != 0 {
+			tm = tm.UTC()
+		}
+		if o.flags&JSONOutputFlagTime != 0 {
+			x := tm.Format(o.timeLayout)
+			data.Time = &x
+		}
+		if o.flags&(JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+			var x int64
+			if o.flags&JSONOutputFlagTimestampMicro == 0 {
+				x = tm.Unix()
+			} else {
+				x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
+			}
+			data.Timestamp = &x
+		}
+	}
+
+	if o.flags&JSONOutputFlagSeverityLevel != 0 {
+		x := int(log.Severity)
+		data.SeverityLevel = &x
+	}
+
+	if o.flags&JSONOutputFlagVerbosity != 0 {
+		x := int(log.Verbosity)
+		data.Verbosity = &x
+	}
+
+	if o.flags&(JSONOutputFlagLongFunc|JSONOutputFlagShortFunc) != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
-			fn = trimSrcPath(log.StackCaller.Function)
+			fn = log.StackCaller.Function
 		}
-		data.Func = fn
+		if o.flags&JSONOutputFlagShortFunc != 0 {
+			fn = trimDirs(fn)
+		}
+		data.Func = &fn
 	}
 
-	if o.flags&JSONOutputFlagFile != 0 {
+	if o.flags&(JSONOutputFlagLongFile|JSONOutputFlagShortFile) != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
-			file = trimSrcPath(log.StackCaller.File)
+			file = log.StackCaller.File
+			if o.flags&JSONOutputFlagShortFile != 0 {
+				file = trimDirs(file)
+			}
 		}
 		if log.StackCaller.Line > 0 {
 			line = log.StackCaller.Line
 		}
-		data.File = fmt.Sprintf("%s:%d", file, line)
+		x := fmt.Sprintf("%s:%d", file, line)
+		data.File = &x
 	}
 
-	if o.flags&JSONOutputFlagStackTrace != 0 && log.StackTrace != nil {
-		data.StackTrace = fmt.Sprintf("%+.1s", log.StackTrace)
+	if o.flags&(JSONOutputFlagStackTrace|JSONOutputFlagStackTraceShortFile) != 0 && log.StackTrace != nil {
+		f := "%+.1s"
+		if o.flags&JSONOutputFlagStackTraceShortFile != 0 {
+			f = "%+#.1s"
+		}
+		x := fmt.Sprintf(f, log.StackTrace)
+		data.StackTrace = &x
 	}
 
+	fieldsKvs := make([]string, 0, 2*len(log.Fields))
 	if o.flags&JSONOutputFlagFields != 0 {
-		data.Fields = make(map[string]string, 4096)
+		fieldsMap := make(map[string]string, len(log.Fields))
 		for idx, field := range log.Fields {
 			key := fmt.Sprintf("_%s", field.Key)
-			if _, ok := data.Fields[key]; ok {
+			if _, ok := fieldsMap[key]; ok {
 				key = fmt.Sprintf("%d_%s", idx, field.Key)
 			}
-			data.Fields[key] = fmt.Sprintf("%v", field.Value)
+			val := fmt.Sprintf("%v", field.Value)
+			fieldsMap[key] = val
+			fieldsKvs = append(fieldsKvs, key, val)
 		}
 	}
 
 	buf.WriteRune('{')
+
 	var b []byte
 
 	b, err = json.Marshal(&data)
 	if err != nil {
+		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
 	b = bytes.TrimLeft(b, "{")
 	b = bytes.TrimRight(b, "}")
 	buf.Write(b)
 
-	if len(data.Fields) > 0 {
+	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
 		buf.WriteRune(',')
-		b, err = json.Marshal(data.Fields)
+		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
 		if err != nil {
+			err = fmt.Errorf("unable to marshal field: %w", err)
 			return
 		}
 		b = bytes.TrimLeft(b, "{")
@@ -127,8 +170,9 @@ func (o *JSONOutput) Log(log *Log) {
 	buf.WriteRune('}')
 	buf.WriteRune('\n')
 
-	_, err = o.w.Write(buf.Bytes())
+	_, err = io.Copy(o.w, buf)
 	if err != nil {
+		err = fmt.Errorf("unable to write to writer: %w", err)
 		return
 	}
 }
@@ -144,7 +188,6 @@ func (o *JSONOutput) SetWriter(w io.Writer) *JSONOutput {
 
 // SetFlags sets flags to override every single Log.Flags if the argument flags different from 0.
 // It returns the underlying JSONOutput.
-// By default, 0.
 func (o *JSONOutput) SetFlags(flags JSONOutputFlag) *JSONOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -159,20 +202,67 @@ func (o *JSONOutput) SetOnError(f func(error)) *JSONOutput {
 	return o
 }
 
+// SetTimeLayout sets a time layout to format time field.
+// It returns the underlying JSONOutput.
+func (o *JSONOutput) SetTimeLayout(timeLayout string) *JSONOutput {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.timeLayout = timeLayout
+	return o
+}
+
+// JSONOutputFlag holds single or multiple flags of JSONOutput.
+// A JSONOutput instance uses these flags which are stored by JSONOutputFlag type.
 type JSONOutputFlag int
 
 const (
-	JSONOutputFlagUTC JSONOutputFlag = 1 << iota
+	// JSONOutputFlagSeverity prints the string value of severity into severity field.
+	JSONOutputFlagSeverity JSONOutputFlag = 1 << iota
 
-	JSONOutputFlagSeverity
+	// JSONOutputFlagTime prints the time in local time zone into time field.
+	JSONOutputFlagTime
 
-	JSONOutputFlagFunc
+	// JSONOutputFlagUTC uses UTC rather than the local time zone if JSONOutputFlagTime is set.
+	JSONOutputFlagUTC
 
-	JSONOutputFlagFile
+	// JSONOutputFlagTimestamp prints the unix timestamp into timestamp field.
+	JSONOutputFlagTimestamp
 
+	// JSONOutputFlagTimestampMicro prints the unix timestamp with microsecond resolution into timestamp field.
+	// assumes JSONOutputFlagTimestamp.
+	JSONOutputFlagTimestampMicro
+
+	// JSONOutputFlagSeverityLevel prints the numeric value of severity into severity_level field.
+	JSONOutputFlagSeverityLevel
+
+	// JSONOutputFlagVerbosity prints verbosity field.
+	JSONOutputFlagVerbosity
+
+	// JSONOutputFlagLongFunc prints full package name and function name into func field : a/b/c/d.Func1().
+	JSONOutputFlagLongFunc
+
+	// JSONOutputFlagShortFunc prints final package name and function name into func field: d.Func1().
+	// overrides JSONOutputFlagLongFunc.
+	JSONOutputFlagShortFunc
+
+	// JSONOutputFlagLongFile prints full file name and line number into file field: a/b/c/d.go:23.
+	JSONOutputFlagLongFile
+
+	// JSONOutputFlagShortFile prints final file name element and line number into file field: d.go:23.
+	// overrides JSONOutputFlagLongFile.
+	JSONOutputFlagShortFile
+
+	// JSONOutputFlagStackTrace prints stack_trace field if the stack trace is given.
 	JSONOutputFlagStackTrace
 
+	// JSONOutputFlagStackTraceShortFile prints with file name element only.
+	// assumes JSONOutputFlagStackTrace.
+	JSONOutputFlagStackTraceShortFile
+
+	// JSONOutputFlagFields prints additional fields if given.
 	JSONOutputFlagFields
 
-	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagFunc | JSONOutputFlagFile | JSONOutputFlagStackTrace | JSONOutputFlagFields
+	// JSONOutputFlagDefault holds predefined default flags.
+	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLongFunc |
+		JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
 )

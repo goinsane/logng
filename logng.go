@@ -1,19 +1,11 @@
-// Package logng provides leveled and structured logging.
+// Package logng provides structured and leveled logging.
 package logng
 
 import (
 	"io"
 	"os"
-	"runtime"
 	"time"
 )
-
-// ProgramCounters returns program counters by using runtime.Callers.
-func ProgramCounters(size, skip int) []uintptr {
-	programCounter := make([]uintptr, size)
-	programCounter = programCounter[:runtime.Callers(skip, programCounter)]
-	return programCounter
-}
 
 // Reset resets the default Logger and the default TextOutput.
 func Reset() {
@@ -181,6 +173,11 @@ func WithTime(tm time.Time) *Logger {
 	return defaultLogger.WithTime(tm)
 }
 
+// WithoutTime clones the default Logger without time.
+func WithoutTime() *Logger {
+	return defaultLogger.WithoutTime()
+}
+
 // WithPrefix clones the default Logger and adds the given prefix to the end of the underlying prefix.
 func WithPrefix(args ...interface{}) *Logger {
 	return defaultLogger.WithPrefix(args...)
@@ -211,7 +208,7 @@ func WithFieldKeyVals(kvs ...interface{}) *Logger {
 	return defaultLogger.WithFieldKeyVals(kvs...)
 }
 
-// WithFieldMap clones the default Logger with the given fieldMap.
+// WithFieldMap clones the default Logger with the given field map.
 func WithFieldMap(fieldMap map[string]interface{}) *Logger {
 	return defaultLogger.WithFieldMap(fieldMap)
 }

@@ -2,12 +2,10 @@ package logng
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 	"sync"
 	"sync/atomic"
-	"time"
 	"unsafe"
 )
 
@@ -109,21 +107,6 @@ func (q *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
 	return q
 }
 
-// WaitForEmpty waits until the queue is empty by the given context.
-func (q *QueuedOutput) WaitForEmpty(ctx context.Context) error {
-	for ctx.Err() == nil {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-time.After(50 * time.Millisecond):
-			if len(q.queue) == 0 {
-				return nil
-			}
-		}
-	}
-	return ctx.Err()
-}
-
 func (q *QueuedOutput) worker() {
 	defer q.wg.Done()
 	for msg := range q.queue {
@@ -207,7 +190,7 @@ func (o *TextOutput) Log(log *Log) {
 	if o.flags&(TextOutputFlagLongFunc|TextOutputFlagShortFunc) != 0 {
 		fn := "???"
 		if log.StackCaller.Function != "" {
-			fn = trimSrcPath(log.StackCaller.Function)
+			fn = log.StackCaller.Function
 		}
 		if o.flags&TextOutputFlagShortFunc != 0 {
 			fn = trimDirs(fn)
@@ -220,7 +203,7 @@ func (o *TextOutput) Log(log *Log) {
 	if o.flags&(TextOutputFlagLongFile|TextOutputFlagShortFile) != 0 {
 		file, line := "???", 0
 		if log.StackCaller.File != "" {
-			file = trimSrcPath(log.StackCaller.File)
+			file = log.StackCaller.File
 			if o.flags&TextOutputFlagShortFile != 0 {
 				file = trimDirs(file)
 			}
@@ -266,15 +249,20 @@ func (o *TextOutput) Log(log *Log) {
 		buf.WriteRune('\n')
 	}
 
-	if o.flags&TextOutputFlagStackTrace != 0 && log.StackTrace != nil {
+	if o.flags&(TextOutputFlagStackTrace|TextOutputFlagStackTraceShortFile) != 0 && log.StackTrace != nil {
 		extend()
-		buf.WriteString(fmt.Sprintf("%+1.1s", log.StackTrace))
+		f := "%+1.1s"
+		if o.flags&TextOutputFlagStackTraceShortFile != 0 {
+			f = "%+#1.1s"
+		}
+		buf.WriteString(fmt.Sprintf(f, log.StackTrace))
 		buf.WriteString("\n\t")
 		buf.WriteRune('\n')
 	}
 
-	_, err = o.w.Write(buf.Bytes())
+	_, err = io.Copy(o.w, buf)
 	if err != nil {
+		err = fmt.Errorf("unable to write to writer: %w", err)
 		return
 	}
 }
@@ -290,7 +278,6 @@ func (o *TextOutput) SetWriter(w io.Writer) *TextOutput {
 
 // SetFlags sets flags to override every single Log.Flags if argument flags is different from 0.
 // It returns the underlying TextOutput.
-// By default, 0.
 func (o *TextOutput) SetFlags(flags TextOutputFlag) *TextOutput {
 	o.mu.Lock()
 	defer o.mu.Unlock()
@@ -306,46 +293,55 @@ func (o *TextOutput) SetOnError(f func(error)) *TextOutput {
 }
 
 // TextOutputFlag holds single or multiple flags of TextOutput.
-// An TextOutput instance uses these flags which are stored by TextOutputFlag type.
+// A TextOutput instance uses these flags which are stored by TextOutputFlag type.
 type TextOutputFlag int
 
 const (
-	// TextOutputFlagDate prints the date in the local time zone: 2009/01/23
+	// TextOutputFlagDate prints the date in the local time zone: 2009/01/23.
 	TextOutputFlagDate TextOutputFlag = 1 << iota
 
-	// TextOutputFlagTime prints the time in the local time zone: 01:23:23
+	// TextOutputFlagTime prints the time in the local time zone: 01:23:23.
 	TextOutputFlagTime
 
-	// TextOutputFlagMicroseconds prints microsecond resolution: 01:23:23.123123
+	// TextOutputFlagMicroseconds prints microsecond resolution: 01:23:23.123123.
+	// assumes TextOutputFlagTime.
 	TextOutputFlagMicroseconds
 
-	// TextOutputFlagUTC uses UTC rather than the local time zone
+	// TextOutputFlagUTC uses UTC rather than the local time zone if TextOutputFlagDate or TextOutputFlagTime is set.
 	TextOutputFlagUTC
 
-	// TextOutputFlagSeverity prints severity level
+	// TextOutputFlagSeverity prints the severity.
 	TextOutputFlagSeverity
 
-	// TextOutputFlagPadding prints padding with multiple lines
+	// TextOutputFlagPadding prints padding with multiple lines.
 	TextOutputFlagPadding
 
-	// TextOutputFlagLongFunc prints full package name and function name: a/b/c/d.Func1()
+	// TextOutputFlagLongFunc prints full package name and function name: a/b/c/d.Func1().
 	TextOutputFlagLongFunc
 
-	// TextOutputFlagShortFunc prints final package name and function name: d.Func1()
+	// TextOutputFlagShortFunc prints final package name and function name: d.Func1().
+	// overrides TextOutputFlagLongFunc.
 	TextOutputFlagShortFunc
 
-	// TextOutputFlagLongFile prints full file name and line number: a/b/c/d.go:23
+	// TextOutputFlagLongFile prints full file name and line number: a/b/c/d.go:23.
 	TextOutputFlagLongFile
 
-	// TextOutputFlagShortFile prints final file name element and line number: d.go:23
+	// TextOutputFlagShortFile prints final file name element and line number: d.go:23.
+	// overrides TextOutputFlagLongFile.
 	TextOutputFlagShortFile
 
-	// TextOutputFlagFields prints fields if there are
+	// TextOutputFlagFields prints fields if given.
 	TextOutputFlagFields
 
-	// TextOutputFlagStackTrace prints the stack trace if there is
+	// TextOutputFlagStackTrace prints the stack trace if given.
 	TextOutputFlagStackTrace
 
-	// TextOutputFlagDefault holds initial flags for the Logger
-	TextOutputFlagDefault = TextOutputFlagDate | TextOutputFlagTime | TextOutputFlagSeverity | TextOutputFlagPadding | TextOutputFlagFields | TextOutputFlagStackTrace
+	// TextOutputFlagStackTraceShortFile prints with file name element only.
+	// assumes TextOutputFlagStackTrace.
+	TextOutputFlagStackTraceShortFile
+
+	// TextOutputFlagDefault holds predefined default flags.
+	// it used by the default Logger.
+	TextOutputFlagDefault = TextOutputFlagDate | TextOutputFlagTime | TextOutputFlagSeverity |
+		TextOutputFlagPadding | TextOutputFlagFields | TextOutputFlagStackTraceShortFile
 )

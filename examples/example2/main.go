@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/goinsane/logng"
+	"github.com/goinsane/logng/v2"
 )
 
 var (
@@ -14,8 +14,10 @@ var (
 func main() {
 	// reset logng for previous changes if it is running in go test.
 	logng.Reset()
+
 	// set JSONOutput.
-	logng.SetOutput(logng.NewJSONOutput(os.Stdout, logng.JSONOutputFlagDefault))
+	output := logng.NewJSONOutput(os.Stdout, logng.JSONOutputFlagDefault)
+	logng.SetOutput(output)
 
 	// log by Severity.
 	// default severity is SeverityInfo.
@@ -54,4 +56,14 @@ func main() {
 
 	// WithFieldKeyVals()
 	logng.WithFieldKeyVals("key1", "val1", "key2", "val2", "key3", "val3", "key1", "val1-2", "key2", "val2-2").Info("this is info log with several fields.")
+
+	output.SetFlags(logng.JSONOutputFlagSeverity |
+		logng.JSONOutputFlagTime |
+		logng.JSONOutputFlagTimestampMicro |
+		logng.JSONOutputFlagUTC |
+		logng.JSONOutputFlagSeverityLevel |
+		logng.JSONOutputFlagVerbosity |
+		logng.JSONOutputFlagShortFunc |
+		logng.JSONOutputFlagLongFile)
+	logng.Info("test new flags")
 }
