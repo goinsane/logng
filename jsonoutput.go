@@ -211,37 +211,58 @@ func (o *JSONOutput) SetTimeLayout(timeLayout string) *JSONOutput {
 	return o
 }
 
+// JSONOutputFlag holds single or multiple flags of JSONOutput.
+// A JSONOutput instance uses these flags which are stored by JSONOutputFlag type.
 type JSONOutputFlag int
 
 const (
+	// JSONOutputFlagSeverity prints the string value of severity into severity field.
 	JSONOutputFlagSeverity JSONOutputFlag = 1 << iota
 
+	// JSONOutputFlagTime prints the time in local time zone into time field.
 	JSONOutputFlagTime
 
-	JSONOutputFlagTimestamp
-
-	JSONOutputFlagTimestampMicro
-
+	// JSONOutputFlagUTC uses UTC rather than the local time zone if JSONOutputFlagTime is set.
 	JSONOutputFlagUTC
 
+	// JSONOutputFlagTimestamp prints the unix timestamp into timestamp field.
+	JSONOutputFlagTimestamp
+
+	// JSONOutputFlagTimestampMicro prints the unix timestamp with microsecond resolution into timestamp field.
+	// assumes JSONOutputFlagTimestamp.
+	JSONOutputFlagTimestampMicro
+
+	// JSONOutputFlagSeverityLevel prints the numeric value of severity into severity_level field.
 	JSONOutputFlagSeverityLevel
 
+	// JSONOutputFlagVerbosity prints verbosity field.
 	JSONOutputFlagVerbosity
 
+	// JSONOutputFlagLongFunc prints full package name and function name into func field : a/b/c/d.Func1().
 	JSONOutputFlagLongFunc
 
+	// JSONOutputFlagShortFunc prints final package name and function name into func field: d.Func1().
+	// overrides JSONOutputFlagLongFunc.
 	JSONOutputFlagShortFunc
 
+	// JSONOutputFlagLongFile prints full file name and line number into file field: a/b/c/d.go:23.
 	JSONOutputFlagLongFile
 
+	// JSONOutputFlagShortFile prints final file name element and line number into file field: d.go:23.
+	// overrides JSONOutputFlagLongFile.
 	JSONOutputFlagShortFile
 
+	// JSONOutputFlagStackTrace prints stack_trace field if the stack trace is given.
 	JSONOutputFlagStackTrace
 
+	// JSONOutputFlagStackTraceShortFile prints with file name element only.
+	// assumes JSONOutputFlagStackTrace.
 	JSONOutputFlagStackTraceShortFile
 
+	// JSONOutputFlagFields prints additional fields if given.
 	JSONOutputFlagFields
 
+	// JSONOutputFlagDefault holds predefined default flags.
 	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLongFunc |
 		JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
 )

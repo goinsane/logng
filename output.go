@@ -293,50 +293,55 @@ func (o *TextOutput) SetOnError(f func(error)) *TextOutput {
 }
 
 // TextOutputFlag holds single or multiple flags of TextOutput.
-// An TextOutput instance uses these flags which are stored by TextOutputFlag type.
+// A TextOutput instance uses these flags which are stored by TextOutputFlag type.
 type TextOutputFlag int
 
 const (
-	// TextOutputFlagDate prints the date in the local time zone: 2009/01/23
+	// TextOutputFlagDate prints the date in the local time zone: 2009/01/23.
 	TextOutputFlagDate TextOutputFlag = 1 << iota
 
-	// TextOutputFlagTime prints the time in the local time zone: 01:23:23
+	// TextOutputFlagTime prints the time in the local time zone: 01:23:23.
 	TextOutputFlagTime
 
-	// TextOutputFlagMicroseconds prints microsecond resolution: 01:23:23.123123
+	// TextOutputFlagMicroseconds prints microsecond resolution: 01:23:23.123123.
+	// assumes TextOutputFlagTime.
 	TextOutputFlagMicroseconds
 
-	// TextOutputFlagUTC uses UTC rather than the local time zone
+	// TextOutputFlagUTC uses UTC rather than the local time zone if TextOutputFlagDate or TextOutputFlagTime is set.
 	TextOutputFlagUTC
 
-	// TextOutputFlagSeverity prints severity level
+	// TextOutputFlagSeverity prints the severity.
 	TextOutputFlagSeverity
 
-	// TextOutputFlagPadding prints padding with multiple lines
+	// TextOutputFlagPadding prints padding with multiple lines.
 	TextOutputFlagPadding
 
-	// TextOutputFlagLongFunc prints full package name and function name: a/b/c/d.Func1()
+	// TextOutputFlagLongFunc prints full package name and function name: a/b/c/d.Func1().
 	TextOutputFlagLongFunc
 
-	// TextOutputFlagShortFunc prints final package name and function name: d.Func1()
+	// TextOutputFlagShortFunc prints final package name and function name: d.Func1().
+	// overrides TextOutputFlagLongFunc.
 	TextOutputFlagShortFunc
 
-	// TextOutputFlagLongFile prints full file name and line number: a/b/c/d.go:23
+	// TextOutputFlagLongFile prints full file name and line number: a/b/c/d.go:23.
 	TextOutputFlagLongFile
 
-	// TextOutputFlagShortFile prints final file name element and line number: d.go:23
+	// TextOutputFlagShortFile prints final file name element and line number: d.go:23.
+	// overrides TextOutputFlagLongFile.
 	TextOutputFlagShortFile
 
-	// TextOutputFlagFields prints fields if there are
+	// TextOutputFlagFields prints fields if given.
 	TextOutputFlagFields
 
-	// TextOutputFlagStackTrace prints the stack trace if there is
+	// TextOutputFlagStackTrace prints the stack trace if given.
 	TextOutputFlagStackTrace
 
-	// TextOutputFlagStackTraceShortFile prints the stack trace with final file name if there is
+	// TextOutputFlagStackTraceShortFile prints with file name element only.
+	// assumes TextOutputFlagStackTrace.
 	TextOutputFlagStackTraceShortFile
 
-	// TextOutputFlagDefault holds initial flags for the Logger
+	// TextOutputFlagDefault holds predefined default flags.
+	// it used by the default Logger.
 	TextOutputFlagDefault = TextOutputFlagDate | TextOutputFlagTime | TextOutputFlagSeverity |
-		TextOutputFlagPadding | TextOutputFlagFields
+		TextOutputFlagPadding | TextOutputFlagFields | TextOutputFlagStackTraceShortFile
 )
