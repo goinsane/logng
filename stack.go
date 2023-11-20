@@ -182,10 +182,3 @@ func (t *StackTrace) Caller(index int) StackCaller {
 	}
 	return t.callers[index]
 }
-
-// programCounters returns program counters by using runtime.Callers.
-func programCounters(size, skip int) []uintptr {
-	programCounter := make([]uintptr, size)
-	programCounter = programCounter[:runtime.Callers(skip, programCounter)]
-	return programCounter
-}
