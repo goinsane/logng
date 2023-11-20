@@ -1,4 +1,4 @@
-// Package logng provides leveled and structured logging.
+// Package logng provides structured and leveled logging.
 package logng
 
 import (
