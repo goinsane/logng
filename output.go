@@ -116,7 +116,7 @@ func (q *QueuedOutput) worker() {
 
 // TextOutput is an implementation of Output by writing texts to io.Writer w.
 type TextOutput struct {
-	mu      sync.Mutex
+	mu      sync.RWMutex
 	w       io.Writer
 	flags   TextOutputFlag
 	onError *func(error)
@@ -141,8 +141,8 @@ func (o *TextOutput) Log(log *Log) {
 		(*onError)(err)
 	}()
 
-	o.mu.Lock()
-	defer o.mu.Unlock()
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
 	buf := bytes.NewBuffer(make([]byte, 0, 4096))
 
