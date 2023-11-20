@@ -4,26 +4,26 @@ import (
 	"strings"
 )
 
-// Severity describes severity level of Log.
+// Severity describes the severity level of Log.
 type Severity int
 
 const (
-	// SeverityNone is none or unspecified severity level
+	// SeverityNone is none or unspecified severity level.
 	SeverityNone Severity = iota
 
-	// SeverityFatal is fatal severity level
+	// SeverityFatal is the fatal severity level.
 	SeverityFatal
 
-	// SeverityError is error severity level
+	// SeverityError is the error severity level.
 	SeverityError
 
-	// SeverityWarning is warning severity level
+	// SeverityWarning is the warning severity level.
 	SeverityWarning
 
-	// SeverityInfo is info severity level
+	// SeverityInfo is the info severity level.
 	SeverityInfo
 
-	// SeverityDebug is debug severity level
+	// SeverityDebug is the debug severity level.
 	SeverityDebug
 )
 
@@ -40,14 +40,14 @@ func (s Severity) CheckValid() error {
 	return nil
 }
 
-// String is implementation of fmt.Stringer.
+// String is the implementation of fmt.Stringer.
 func (s Severity) String() string {
 	text, _ := s.MarshalText()
 	return string(text)
 }
 
-// MarshalText is implementation of encoding.TextMarshaler.
-// If s is invalid, it returns nil and result of Severity.CheckValid.
+// MarshalText is the implementation of encoding.TextMarshaler.
+// If s is invalid, it returns the error from Severity.CheckValid.
 func (s Severity) MarshalText() (text []byte, err error) {
 	if e := s.CheckValid(); e != nil {
 		return nil, e
@@ -72,7 +72,7 @@ func (s Severity) MarshalText() (text []byte, err error) {
 	return []byte(str), nil
 }
 
-// UnmarshalText is implementation of encoding.UnmarshalText.
+// UnmarshalText is the implementation of encoding.TextUnmarshaler.
 // If text is unknown, it returns ErrUnknownSeverity.
 func (s *Severity) UnmarshalText(text []byte) error {
 	switch str := strings.ToUpper(string(text)); str {
