@@ -341,6 +341,14 @@ func BenchmarkWithFieldKeyVals(b *testing.B) {
 	}
 }
 
+func BenchmarkLogger_Info(b *testing.B) {
+	logger := logng.NewLogger(nopOutput{}, logng.SeverityInfo, 0)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		logger.Info("benchmark")
+	}
+}
+
 func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
 	logger := logng.NewLogger(nopOutput{}, logng.SeverityInfo, 0)
 	logger.SetStackTraceSeverity(logng.SeverityInfo)
@@ -352,7 +360,7 @@ func BenchmarkLogger_Info_withStackTrace(b *testing.B) {
 
 type nopOutput struct{}
 
-func (nopOutput) Log(log *logng.Log) {}
+func (nopOutput) Log(*logng.Log) {}
 
 var (
 	testTime, _ = time.ParseInLocation("2006-01-02T15:04:05", "2010-11-12T13:14:15", time.Local)
