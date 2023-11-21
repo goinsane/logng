@@ -163,6 +163,14 @@ func (t *StackTrace) SizeOfProgramCounters() int {
 	return len(t.programCounters)
 }
 
+// ProgramCounter returns a program counter on the given index. It panics if index is out of range.
+func (t *StackTrace) ProgramCounter(index int) uintptr {
+	if 0 > index || index >= len(t.programCounters) {
+		panic("index out of range")
+	}
+	return t.programCounters[index]
+}
+
 // Callers returns StackCaller's.
 func (t *StackTrace) Callers() []StackCaller {
 	result := make([]StackCaller, len(t.callers))
