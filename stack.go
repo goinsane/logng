@@ -90,7 +90,8 @@ func NewStackTrace(programCounters []uintptr) *StackTrace {
 }
 
 // CurrentStackTrace creates a new StackTrace at this point.
-// It uses runtime.Callers and uses skip arguments as is. So you should increase skip argument by 1.
+// size limits maximum program counter size.
+// It uses runtime.Callers and uses skip argument as is. So you should increase skip argument by 1.
 func CurrentStackTrace(size, skip int) *StackTrace {
 	pc := make([]uintptr, size)
 	pc = pc[:runtime.Callers(skip, pc)]
