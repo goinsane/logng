@@ -1,6 +1,6 @@
 # logng
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/goinsane/logng.svg)](https://pkg.go.dev/github.com/goinsane/logng)
+[![Go Reference](https://pkg.go.dev/badge/github.com/goinsane/logng/v2.svg)](https://pkg.go.dev/github.com/goinsane/logng/v2)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=goinsane_logng&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=goinsane_logng)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=goinsane_logng&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=goinsane_logng)
 
@@ -13,7 +13,7 @@
 - Text and JSON output
 - Customizable output
 - Function and file logging
-- Stack trace
+- Stack trace logging
 - Field support
 - Performance optimized
 
@@ -27,10 +27,14 @@ go get github.com/goinsane/logng/v2
 
 ## Examples
 
+### Basic example
+
 ```go
 package main
 
 import (
+	"errors"
+
 	"github.com/goinsane/logng/v2"
 )
 
@@ -46,14 +50,50 @@ func main() {
 	// set stack trace severity
 	logng.SetStackTraceSeverity(logng.SeverityWarning)
 
-	// log with fields
-	logng.WithFieldKeyVals("user_name", "john", "ip", "1.2.3.4").Info("connected.")
+	// logs with stack trace, because the log severity is warning
+	logng.Warningf("a warning: %w", errors.New("unknown"))
 
-	// logs with stack trace, because the log severity is error
-	logng.Error("an error")
+	// log with fields
+	logger := logng.WithFieldKeyVals("user_name", "john", "ip", "1.2.3.4")
+	logger.Infof("connected user:\n%s", "John Smith")
+
+	// logs with fields and stack trace
+	logger.Error("an error")
 }
 
 ```
+
+```text
+2023/11/21 16:18:37 INFO - this is info log.
+2023/11/21 16:18:37 WARNING - this is warning log.
+2023/11/21 16:18:37 WARNING - a warning: unknown
+    
+	main.main(0x104d6f7b0)
+		main.go:22 +0x150
+	runtime.main(0x104d0a2e0)
+		proc.go:250 +0x247
+	runtime.goexit(0x104d35390)
+		asm_arm64.s:1172 +0x3
+    
+2023/11/21 16:18:37 INFO - connected user:
+                           John Smith
+    
+	+ "user_name"="john" "ip"="1.2.3.4"
+    
+2023/11/21 16:18:37 ERROR - an error
+    
+	+ "user_name"="john" "ip"="1.2.3.4"
+    
+	main.main(0x104d6f7b0)
+		main.go:29 +0x248
+	runtime.main(0x104d0a2e0)
+		proc.go:250 +0x247
+	runtime.goexit(0x104d35390)
+		asm_arm64.s:1172 +0x3
+    
+```
+
+### More examples
 
 To run any example, please use the command like the following:
 
@@ -84,8 +124,10 @@ go test -v -run=^Benchmark -bench=.
 
 ## Contributing
 
-Contributions are welcome! If you find a bug or want to add a feature, please open an issue or create a pull request.
+We welcome contributions from the community to improve and expand project capabilities. If you find a bug, have a
+feature request, or want to contribute code, please follow our guidelines for contributing
+([CONTRIBUTING.md](CONTRIBUTING.md)) and submit a pull request.
 
 ## License
 
-This project is licensed under the [BSD License](LICENSE).
+This project is licensed under the [BSD 3-Clause License](LICENSE).

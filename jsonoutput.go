@@ -13,7 +13,7 @@ import (
 
 // JSONOutput is an implementation of Output by writing json to io.Writer w.
 type JSONOutput struct {
-	mu         sync.Mutex
+	mu         sync.RWMutex
 	w          io.Writer
 	flags      JSONOutputFlag
 	onError    *func(error)
@@ -40,10 +40,8 @@ func (o *JSONOutput) Log(log *Log) {
 		(*onError)(err)
 	}()
 
-	o.mu.Lock()
-	defer o.mu.Unlock()
-
-	buf := bytes.NewBuffer(make([]byte, 0, 4096))
+	o.mu.RLock()
+	defer o.mu.RUnlock()
 
 	var data struct {
 		Severity      *string `json:"severity,omitempty"`
@@ -142,8 +140,6 @@ func (o *JSONOutput) Log(log *Log) {
 		}
 	}
 
-	buf.WriteRune('{')
-
 	var b []byte
 
 	b, err = json.Marshal(&data)
@@ -151,9 +147,7 @@ func (o *JSONOutput) Log(log *Log) {
 		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
-	b = bytes.TrimLeft(b, "{")
-	b = bytes.TrimRight(b, "}")
-	buf.Write(b)
+	buf := bytes.NewBuffer(bytes.TrimRight(b, "}"))
 
 	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
 		buf.WriteRune(',')

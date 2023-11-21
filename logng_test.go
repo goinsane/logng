@@ -130,8 +130,8 @@ func ExampleSetSeverity() {
 	logng.SetTextOutputFlags(logng.TextOutputFlagSeverity)
 
 	logng.SetSeverity(logng.SeverityWarning)
-	logng.Debug("this is debug log.")
-	logng.Info("this is info log.")
+	logng.Debug("this is debug log. it won't be shown.")
+	logng.Info("this is info log. it won't be shown.")
 	logng.Warning("this is warning log.")
 	logng.Error("this is error log.")
 

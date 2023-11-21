@@ -14,6 +14,7 @@ func Reset() {
 	SetVerbose(0)
 	SetPrintSeverity(SeverityInfo)
 	SetStackTraceSeverity(SeverityNone)
+	SetStackTracePCSize(64)
 	SetTextOutputWriter(defaultTextOutputWriter)
 	SetTextOutputFlags(TextOutputFlagDefault)
 }
@@ -161,6 +162,14 @@ func SetPrintSeverity(printSeverity Severity) *Logger {
 // By default, SeverityNone.
 func SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return defaultLogger.SetStackTraceSeverity(stackTraceSeverity)
+}
+
+// SetStackTracePCSize sets the maximum program counter size of the stack trace for the default Logger.
+// If stackTracePCSize is out of range, it sets 64. The range is 1 to 16384 each included.
+// It returns the default Logger.
+// By default, 64.
+func SetStackTracePCSize(stackTracePCSize int) *Logger {
+	return defaultLogger.SetStackTracePCSize(stackTracePCSize)
 }
 
 // V clones the default Logger with the given verbosity if the default Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.

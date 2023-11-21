@@ -17,6 +17,7 @@ type Logger struct {
 	verbose            Verbose
 	printSeverity      Severity
 	stackTraceSeverity Severity
+	stackTracePCSize   int
 	verbosity          Verbose
 	time               *time.Time
 	prefix             string
@@ -36,6 +37,7 @@ func NewLogger(output Output, severity Severity, verbose Verbose) *Logger {
 		verbose:            verbose,
 		printSeverity:      SeverityInfo,
 		stackTraceSeverity: SeverityNone,
+		stackTracePCSize:   64,
 	}
 }
 
@@ -52,6 +54,7 @@ func (l *Logger) Clone() *Logger {
 		verbose:            l.verbose,
 		printSeverity:      l.printSeverity,
 		stackTraceSeverity: l.stackTraceSeverity,
+		stackTracePCSize:   l.stackTracePCSize,
 		verbosity:          l.verbosity,
 		time:               nil,
 		prefix:             l.prefix,
@@ -114,9 +117,9 @@ func (l *Logger) out(severity Severity, message string, err error) {
 
 	pcSize := 1
 	if includeStackTrace {
-		pcSize = 64
+		pcSize = l.stackTracePCSize
 	}
-	pc := ProgramCounters(pcSize, 5)
+	pc := programCounters(pcSize, 5)
 	st := NewStackTrace(pc)
 
 	if st.SizeOfCallers() > 0 {
@@ -282,11 +285,11 @@ func (l *Logger) SetSeverity(severity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !severity.IsValid() {
 		severity = SeverityInfo
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.severity = severity
 	return l
 }
@@ -311,11 +314,11 @@ func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !printSeverity.IsValid() {
 		printSeverity = SeverityInfo
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.printSeverity = printSeverity
 	return l
 }
@@ -328,12 +331,29 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !stackTraceSeverity.IsValid() {
 		stackTraceSeverity = SeverityNone
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.stackTraceSeverity = stackTraceSeverity
+	return l
+}
+
+// SetStackTracePCSize sets the maximum program counter size of the stack trace for the underlying Logger.
+// If stackTracePCSize is out of range, it sets 64. The range is 1 to 16384 each included.
+// It returns the underlying Logger.
+// By default, 64.
+func (l *Logger) SetStackTracePCSize(stackTracePCSize int) *Logger {
+	if l == nil {
+		return nil
+	}
+	if 1 > stackTracePCSize || stackTracePCSize > 16384 {
+		stackTracePCSize = 64
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.stackTracePCSize = stackTracePCSize
 	return l
 }
 
