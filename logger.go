@@ -285,11 +285,11 @@ func (l *Logger) SetSeverity(severity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !severity.IsValid() {
 		severity = SeverityInfo
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.severity = severity
 	return l
 }
@@ -314,11 +314,11 @@ func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !printSeverity.IsValid() {
 		printSeverity = SeverityInfo
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.printSeverity = printSeverity
 	return l
 }
@@ -331,11 +331,11 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	if !stackTraceSeverity.IsValid() {
 		stackTraceSeverity = SeverityNone
 	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	l.stackTraceSeverity = stackTraceSeverity
 	return l
 }
