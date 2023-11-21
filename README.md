@@ -130,4 +130,4 @@ feature request, or want to contribute code, please follow our guidelines for co
 
 ## License
 
-This project is licensed under the [BSD License](LICENSE).
+This project is licensed under the [BSD 3-Clause License](LICENSE).
