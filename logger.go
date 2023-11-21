@@ -119,7 +119,7 @@ func (l *Logger) out(severity Severity, message string, err error) {
 	if includeStackTrace {
 		pcSize = l.stackTracePCSize
 	}
-	pc := programCounters(pcSize, 5)
+	pc := getProgramCounters(pcSize, 5)
 	st := NewStackTrace(pc)
 
 	if st.SizeOfCallers() > 0 {

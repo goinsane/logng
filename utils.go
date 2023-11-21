@@ -11,8 +11,8 @@ type wrappedError interface {
 	Unwrap() error
 }
 
-// programCounters returns program counters by using runtime.Callers.
-func programCounters(size, skip int) []uintptr {
+// getProgramCounters returns program counters by using runtime.Callers.
+func getProgramCounters(size, skip int) []uintptr {
 	pc := make([]uintptr, size)
 	pc = pc[:runtime.Callers(skip, pc)]
 	return pc
