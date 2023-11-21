@@ -124,7 +124,9 @@ go test -v -run=^Benchmark -bench=.
 
 ## Contributing
 
-Contributions are welcome! If you find a bug or want to add a feature, please open an issue or create a pull request.
+We welcome contributions from the community to improve and expand project capabilities. If you find a bug, have a
+feature request, or want to contribute code, please follow our guidelines for contributing
+([CONTRIBUTING.md](CONTRIBUTING.md)) and submit a pull request.
 
 ## License
 
