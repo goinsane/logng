@@ -1,8 +1,5 @@
 package logng
 
-// Verbose is the type of verbose level.
-type Verbose int
-
 // Field is the type of field.
 type Field struct {
 	Key   string
