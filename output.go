@@ -17,9 +17,9 @@ type Output interface {
 
 type multiOutput []Output
 
-func (m multiOutput) Log(log *Log) {
-	for _, o := range m {
-		o.Log(log.Clone())
+func (o multiOutput) Log(log *Log) {
+	for _, o1 := range o {
+		o1.Log(log.Clone())
 	}
 }
 
@@ -43,25 +43,25 @@ type QueuedOutput struct {
 }
 
 // NewQueuedOutput creates a new QueuedOutput by the given output.
-func NewQueuedOutput(output Output, queueLen int) (q *QueuedOutput) {
-	q = &QueuedOutput{
+func NewQueuedOutput(output Output, queueLen int) (o *QueuedOutput) {
+	o = &QueuedOutput{
 		output: output,
 		queue:  make(chan *Log, queueLen),
 	}
-	q.wg.Add(1)
-	go q.worker()
+	o.wg.Add(1)
+	go o.worker()
 	return
 }
 
 // Close stops accepting new logs to the underlying QueuedOutput and waits for the queue to empty.
 // Unused QueuedOutput must be closed for freeing resources.
-func (q *QueuedOutput) Close() error {
-	if !atomic.CompareAndSwapInt32(&q.closing, 0, 1) {
+func (o *QueuedOutput) Close() error {
+	if !atomic.CompareAndSwapInt32(&o.closing, 0, 1) {
 		return nil
 	}
-	q.logWg.Wait()
-	close(q.queue)
-	q.wg.Wait()
+	o.logWg.Wait()
+	close(o.queue)
+	o.wg.Wait()
 	return nil
 }
 
@@ -69,20 +69,20 @@ func (q *QueuedOutput) Close() error {
 // If blocking is true, Log method blocks execution until the underlying output has finished execution.
 // Otherwise, Log method sends the log to the queue if the queue is available.
 // When the queue is full, it tries to call OnQueueFull function.
-func (q *QueuedOutput) Log(log *Log) {
-	q.logWg.Add(1)
-	defer q.logWg.Done()
-	if q.closing != 0 {
+func (o *QueuedOutput) Log(log *Log) {
+	o.logWg.Add(1)
+	defer o.logWg.Done()
+	if o.closing != 0 {
 		return
 	}
-	if q.blocking != 0 {
-		q.queue <- log
+	if o.blocking != 0 {
+		o.queue <- log
 		return
 	}
 	select {
-	case q.queue <- log:
+	case o.queue <- log:
 	default:
-		onQueueFull := q.onQueueFull
+		onQueueFull := o.onQueueFull
 		if onQueueFull != nil && *onQueueFull != nil {
 			(*onQueueFull)()
 		}
@@ -91,26 +91,26 @@ func (q *QueuedOutput) Log(log *Log) {
 
 // SetBlocking sets QueuedOutput behavior when the queue is full.
 // It returns the underlying QueuedOutput.
-func (q *QueuedOutput) SetBlocking(blocking bool) *QueuedOutput {
+func (o *QueuedOutput) SetBlocking(blocking bool) *QueuedOutput {
 	var b uint32
 	if blocking {
 		b = 1
 	}
-	atomic.StoreUint32(&q.blocking, b)
-	return q
+	atomic.StoreUint32(&o.blocking, b)
+	return o
 }
 
 // SetOnQueueFull sets a function to call when the queue is full.
 // It returns the underlying QueuedOutput.
-func (q *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
-	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&q.onQueueFull)), unsafe.Pointer(&f))
-	return q
+func (o *QueuedOutput) SetOnQueueFull(f func()) *QueuedOutput {
+	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&o.onQueueFull)), unsafe.Pointer(&f))
+	return o
 }
 
-func (q *QueuedOutput) worker() {
-	defer q.wg.Done()
-	for msg := range q.queue {
-		q.output.Log(msg)
+func (o *QueuedOutput) worker() {
+	defer o.wg.Done()
+	for log := range o.queue {
+		o.output.Log(log)
 	}
 }
 
