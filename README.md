@@ -13,7 +13,7 @@
 - Text and JSON output
 - Customizable output
 - Function and file logging
-- Stack trace
+- Stack trace logging
 - Field support
 - Performance optimized
 
