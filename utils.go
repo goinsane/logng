@@ -2,20 +2,12 @@ package logng
 
 import (
 	"fmt"
-	"runtime"
 )
 
 // wrappedError is an interface to simulate GoLang's wrapped errors.
 type wrappedError interface {
 	error
 	Unwrap() error
-}
-
-// getProgramCounters returns program counters by using runtime.Callers.
-func getProgramCounters(size, skip int) []uintptr {
-	pc := make([]uintptr, size)
-	pc = pc[:runtime.Callers(skip, pc)]
-	return pc
 }
 
 func itoa(buf *[]byte, i int, wid int) {
