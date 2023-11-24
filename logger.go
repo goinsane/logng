@@ -17,7 +17,7 @@ type Logger struct {
 	verbose            Verbose
 	printSeverity      Severity
 	stackTraceSeverity Severity
-	stackTracePCSize   int
+	stackTraceSize     int
 	verbosity          Verbose
 	time               *time.Time
 	prefix             string
@@ -37,7 +37,7 @@ func NewLogger(output Output, severity Severity, verbose Verbose) *Logger {
 		verbose:            verbose,
 		printSeverity:      SeverityInfo,
 		stackTraceSeverity: SeverityNone,
-		stackTracePCSize:   64,
+		stackTraceSize:     64,
 	}
 }
 
@@ -54,7 +54,7 @@ func (l *Logger) Clone() *Logger {
 		verbose:            l.verbose,
 		printSeverity:      l.printSeverity,
 		stackTraceSeverity: l.stackTraceSeverity,
-		stackTracePCSize:   l.stackTracePCSize,
+		stackTraceSize:     l.stackTraceSize,
 		verbosity:          l.verbosity,
 		time:               nil,
 		prefix:             l.prefix,
@@ -76,6 +76,11 @@ func (l *Logger) out(severity Severity, message string, err error) {
 
 	l.mu.RLock()
 	defer l.mu.RUnlock()
+
+	switch severity {
+	case severityPrint:
+		severity = l.printSeverity
+	}
 
 	if l.output == nil {
 		return
@@ -115,12 +120,11 @@ func (l *Logger) out(severity Severity, message string, err error) {
 
 	includeStackTrace := l.stackTraceSeverity >= severity
 
-	pcSize := 1
+	stSize := 1
 	if includeStackTrace {
-		pcSize = l.stackTracePCSize
+		stSize = l.stackTraceSize
 	}
-	pc := programCounters(pcSize, 5)
-	st := NewStackTrace(pc)
+	st := CurrentStackTrace(stSize, 5)
 
 	if st.SizeOfCallers() > 0 {
 		log.StackCaller = st.Caller(0)
@@ -244,26 +248,17 @@ func (l *Logger) Debugln(args ...interface{}) {
 
 // Print logs a log which has the underlying Logger's print severity.
 func (l *Logger) Print(args ...interface{}) {
-	if l == nil {
-		return
-	}
-	l.log(l.printSeverity, args...)
+	l.log(severityPrint, args...)
 }
 
 // Printf logs a log which has the underlying Logger's print severity.
 func (l *Logger) Printf(format string, args ...interface{}) {
-	if l == nil {
-		return
-	}
-	l.logf(l.printSeverity, format, args...)
+	l.logf(severityPrint, format, args...)
 }
 
 // Println logs a log which has the underlying Logger's print severity.
 func (l *Logger) Println(args ...interface{}) {
-	if l == nil {
-		return
-	}
-	l.logln(l.printSeverity, args...)
+	l.logln(severityPrint, args...)
 }
 
 // SetOutput sets the underlying Logger's output.
@@ -307,14 +302,14 @@ func (l *Logger) SetVerbose(verbose Verbose) *Logger {
 }
 
 // SetPrintSeverity sets the underlying Logger's severity level which is using with Print methods.
-// If printSeverity is invalid, it sets SeverityInfo.
+// If printSeverity is invalid or, less or equal than SeverityFatal; it sets SeverityInfo.
 // It returns the underlying Logger.
 // By default, SeverityInfo.
 func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
 	if l == nil {
 		return nil
 	}
-	if !printSeverity.IsValid() {
+	if !printSeverity.IsValid() || printSeverity <= SeverityFatal {
 		printSeverity = SeverityInfo
 	}
 	l.mu.Lock()
@@ -340,20 +335,20 @@ func (l *Logger) SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return l
 }
 
-// SetStackTracePCSize sets the maximum program counter size of the stack trace for the underlying Logger.
-// If stackTracePCSize is out of range, it sets 64. The range is 1 to 16384 each included.
+// SetStackTraceSize sets the maximum program counter size of the stack trace for the underlying Logger.
+// If stackTraceSize is out of range, it sets 64. The range is 1 to 16384 each included.
 // It returns the underlying Logger.
 // By default, 64.
-func (l *Logger) SetStackTracePCSize(stackTracePCSize int) *Logger {
+func (l *Logger) SetStackTraceSize(stackTraceSize int) *Logger {
 	if l == nil {
 		return nil
 	}
-	if 1 > stackTracePCSize || stackTracePCSize > 16384 {
-		stackTracePCSize = 64
+	if 1 > stackTraceSize || stackTraceSize > 16384 {
+		stackTraceSize = 64
 	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	l.stackTracePCSize = stackTracePCSize
+	l.stackTraceSize = stackTraceSize
 	return l
 }
 

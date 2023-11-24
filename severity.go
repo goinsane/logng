@@ -93,3 +93,8 @@ func (s *Severity) UnmarshalText(text []byte) error {
 	}
 	return nil
 }
+
+// custom severities
+const (
+	severityPrint Severity = -iota - 1
+)

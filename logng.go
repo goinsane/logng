@@ -14,7 +14,7 @@ func Reset() {
 	SetVerbose(0)
 	SetPrintSeverity(SeverityInfo)
 	SetStackTraceSeverity(SeverityNone)
-	SetStackTracePCSize(64)
+	SetStackTraceSize(64)
 	SetTextOutputWriter(defaultTextOutputWriter)
 	SetTextOutputFlags(TextOutputFlagDefault)
 }
@@ -113,17 +113,17 @@ func Debugln(args ...interface{}) {
 
 // Print logs a log which has the default Logger's print severity to the default Logger.
 func Print(args ...interface{}) {
-	defaultLogger.log(defaultLogger.printSeverity, args...)
+	defaultLogger.log(severityPrint, args...)
 }
 
 // Printf logs a log which has the default Logger's print severity to the default Logger.
 func Printf(format string, args ...interface{}) {
-	defaultLogger.logf(defaultLogger.printSeverity, format, args...)
+	defaultLogger.logf(severityPrint, format, args...)
 }
 
 // Println logs a log which has the default Logger's print severity to the default Logger.
 func Println(args ...interface{}) {
-	defaultLogger.logln(defaultLogger.printSeverity, args...)
+	defaultLogger.logln(severityPrint, args...)
 }
 
 // SetOutput sets the default Logger's output.
@@ -164,12 +164,12 @@ func SetStackTraceSeverity(stackTraceSeverity Severity) *Logger {
 	return defaultLogger.SetStackTraceSeverity(stackTraceSeverity)
 }
 
-// SetStackTracePCSize sets the maximum program counter size of the stack trace for the default Logger.
-// If stackTracePCSize is out of range, it sets 64. The range is 1 to 16384 each included.
+// SetStackTraceSize sets the maximum program counter size of the stack trace for the default Logger.
+// If stackTraceSize is out of range, it sets 64. The range is 1 to 16384 each included.
 // It returns the default Logger.
 // By default, 64.
-func SetStackTracePCSize(stackTracePCSize int) *Logger {
-	return defaultLogger.SetStackTracePCSize(stackTracePCSize)
+func SetStackTraceSize(stackTraceSize int) *Logger {
+	return defaultLogger.SetStackTraceSize(stackTraceSize)
 }
 
 // V clones the default Logger with the given verbosity if the default Logger's verbose is greater or equal to the given verbosity, otherwise returns nil.

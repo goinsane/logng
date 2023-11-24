@@ -82,13 +82,28 @@ type StackTrace struct {
 	callers         []StackCaller
 }
 
-// NewStackTrace creates a new StackTrace.
+// NewStackTrace creates a new StackTrace from program counters.
 func NewStackTrace(programCounters []uintptr) *StackTrace {
+	pc := make([]uintptr, len(programCounters))
+	copy(pc, programCounters)
+	return newStackTrace(pc)
+}
+
+// CurrentStackTrace creates a new StackTrace at this point.
+// size limits maximum program counter size.
+// It uses runtime.Callers and uses skip argument as is. So you should increase skip argument by 1.
+func CurrentStackTrace(size, skip int) *StackTrace {
+	pc := make([]uintptr, size)
+	pc = pc[:runtime.Callers(skip, pc)]
+	return newStackTrace(pc)
+}
+
+// newStackTrace creates a new StackTrace from program counters without copying.
+func newStackTrace(programCounters []uintptr) *StackTrace {
 	t := &StackTrace{
-		programCounters: make([]uintptr, len(programCounters)),
+		programCounters: programCounters,
 		callers:         make([]StackCaller, 0, len(programCounters)),
 	}
-	copy(t.programCounters, programCounters)
 	if len(t.programCounters) > 0 {
 		frames := runtime.CallersFrames(t.programCounters)
 		for {
