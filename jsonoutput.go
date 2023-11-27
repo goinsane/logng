@@ -140,17 +140,16 @@ func (o *JSONOutput) Log(log *Log) {
 		}
 	}
 
-	var b []byte
-
-	b, err = json.Marshal(&data)
+	bufBytes, err := json.Marshal(&data)
 	if err != nil {
 		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
-	buf := bytes.NewBuffer(bytes.TrimRight(b, "}"))
+	buf := bytes.NewBuffer(bytes.TrimRight(bufBytes, "}"))
 
 	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
 		buf.WriteRune(',')
+		var b []byte
 		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
 		if err != nil {
 			err = fmt.Errorf("unable to marshal field: %w", err)
