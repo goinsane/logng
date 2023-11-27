@@ -25,9 +25,9 @@ func (o multiOutput) Log(log *Log) {
 
 // MultiOutput creates an output that clones its logs to all the provided outputs.
 func MultiOutput(outputs ...Output) Output {
-	m := make(multiOutput, len(outputs))
-	copy(m, outputs)
-	return m
+	o := make(multiOutput, len(outputs))
+	copy(o, outputs)
+	return o
 }
 
 // QueuedOutput is intermediate Output implementation between Logger and given Output.
