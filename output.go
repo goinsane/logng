@@ -19,7 +19,7 @@ type multiOutput []Output
 
 func (o multiOutput) Log(log *Log) {
 	for _, o1 := range o {
-		o1.Log(log.Clone())
+		o1.Log(log)
 	}
 }
 
