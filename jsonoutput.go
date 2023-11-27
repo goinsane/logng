@@ -129,12 +129,14 @@ func (o *JSONOutput) Log(log *Log) {
 		data.StackTrace = &x
 	}
 
-	bufBytes, err := json.Marshal(&data)
+	var b []byte
+
+	b, err = json.Marshal(&data)
 	if err != nil {
 		err = fmt.Errorf("unable to marshal data: %w", err)
 		return
 	}
-	buf := bytes.NewBuffer(bytes.TrimRight(bufBytes, "}"))
+	buf := bytes.NewBuffer(bytes.TrimRight(b, "}"))
 
 	if o.flags&JSONOutputFlagFields != 0 {
 		uniqueKeys := make(map[string]struct{}, len(log.Fields))
@@ -147,7 +149,6 @@ func (o *JSONOutput) Log(log *Log) {
 				key = fmt.Sprintf("%d_%s", idx, field.Key)
 			}
 			buf.WriteRune(',')
-			var b []byte
 			b, err = json.Marshal(map[string]interface{}{key: field.Value})
 			if err != nil {
 				err = fmt.Errorf("unable to marshal field: %w", err)
