@@ -61,24 +61,27 @@ func (o *JSONOutput) Log(log *Log) {
 		data.Severity = &x
 	}
 
-	if o.flags&(JSONOutputFlagTime|JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+	if o.flags&JSONOutputFlagTime != 0 {
 		tm := log.Time
+		if o.flags&JSONOutputFlagLocal != 0 {
+			tm = tm.Local()
+		}
 		if o.flags&JSONOutputFlagUTC != 0 {
 			tm = tm.UTC()
 		}
-		if o.flags&JSONOutputFlagTime != 0 {
-			x := tm.Format(o.timeLayout)
-			data.Time = &x
+		x := tm.Format(o.timeLayout)
+		data.Time = &x
+	}
+
+	if o.flags&(JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+		tm := log.Time
+		var x int64
+		if o.flags&JSONOutputFlagTimestampMicro == 0 {
+			x = tm.Unix()
+		} else {
+			x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
 		}
-		if o.flags&(JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
-			var x int64
-			if o.flags&JSONOutputFlagTimestampMicro == 0 {
-				x = tm.Unix()
-			} else {
-				x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
-			}
-			data.Timestamp = &x
-		}
+		data.Timestamp = &x
 	}
 
 	if o.flags&JSONOutputFlagSeverityLevel != 0 {
@@ -207,10 +210,13 @@ const (
 	// JSONOutputFlagSeverity prints the string value of severity into severity field.
 	JSONOutputFlagSeverity JSONOutputFlag = 1 << iota
 
-	// JSONOutputFlagTime prints the time in local time zone into time field.
+	// JSONOutputFlagTime prints the time in the given time zone into time field.
 	JSONOutputFlagTime
 
-	// JSONOutputFlagUTC uses UTC rather than the local time zone if JSONOutputFlagTime is set.
+	// JSONOutputFlagLocal uses the local time zone rather than the given time zone if JSONOutputFlagTime is set.
+	JSONOutputFlagLocal
+
+	// JSONOutputFlagUTC uses UTC rather than the given or local time zone if JSONOutputFlagTime is set.
 	JSONOutputFlagUTC
 
 	// JSONOutputFlagTimestamp prints the unix timestamp into timestamp field.
