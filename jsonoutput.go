@@ -61,24 +61,27 @@ func (o *JSONOutput) Log(log *Log) {
 		data.Severity = &x
 	}
 
-	if o.flags&(JSONOutputFlagTime|JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+	if o.flags&JSONOutputFlagTime != 0 {
 		tm := log.Time
+		if o.flags&JSONOutputFlagLocalTZ != 0 {
+			tm = tm.Local()
+		}
 		if o.flags&JSONOutputFlagUTC != 0 {
 			tm = tm.UTC()
 		}
-		if o.flags&JSONOutputFlagTime != 0 {
-			x := tm.Format(o.timeLayout)
-			data.Time = &x
+		x := tm.Format(o.timeLayout)
+		data.Time = &x
+	}
+
+	if o.flags&(JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
+		tm := log.Time
+		var x int64
+		if o.flags&JSONOutputFlagTimestampMicro == 0 {
+			x = tm.Unix()
+		} else {
+			x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
 		}
-		if o.flags&(JSONOutputFlagTimestamp|JSONOutputFlagTimestampMicro) != 0 {
-			var x int64
-			if o.flags&JSONOutputFlagTimestampMicro == 0 {
-				x = tm.Unix()
-			} else {
-				x = tm.Unix()*1e6 + int64(tm.Nanosecond())/1e3
-			}
-			data.Timestamp = &x
-		}
+		data.Timestamp = &x
 	}
 
 	if o.flags&JSONOutputFlagSeverityLevel != 0 {
@@ -126,20 +129,6 @@ func (o *JSONOutput) Log(log *Log) {
 		data.StackTrace = &x
 	}
 
-	fieldsKvs := make([]string, 0, 2*len(log.Fields))
-	if o.flags&JSONOutputFlagFields != 0 {
-		fieldsMap := make(map[string]string, len(log.Fields))
-		for idx, field := range log.Fields {
-			key := fmt.Sprintf("_%s", field.Key)
-			if _, ok := fieldsMap[key]; ok {
-				key = fmt.Sprintf("%d_%s", idx, field.Key)
-			}
-			val := fmt.Sprintf("%v", field.Value)
-			fieldsMap[key] = val
-			fieldsKvs = append(fieldsKvs, key, val)
-		}
-	}
-
 	var b []byte
 
 	b, err = json.Marshal(&data)
@@ -149,20 +138,29 @@ func (o *JSONOutput) Log(log *Log) {
 	}
 	buf := bytes.NewBuffer(bytes.TrimRight(b, "}"))
 
-	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
-		buf.WriteRune(',')
-		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
-		if err != nil {
-			err = fmt.Errorf("unable to marshal field: %w", err)
-			return
+	if o.flags&JSONOutputFlagFields != 0 {
+		uniqueKeys := make(map[string]struct{}, len(log.Fields))
+		for idx, field := range log.Fields {
+			var key string
+			if _, ok := uniqueKeys[field.Key]; !ok {
+				uniqueKeys[field.Key] = struct{}{}
+				key = fmt.Sprintf("_%s", field.Key)
+			} else {
+				key = fmt.Sprintf("%d_%s", idx, field.Key)
+			}
+			buf.WriteRune(',')
+			b, err = json.Marshal(map[string]interface{}{key: field.Value})
+			if err != nil {
+				err = fmt.Errorf("unable to marshal field: %w", err)
+				return
+			}
+			b = bytes.TrimLeft(b, "{")
+			b = bytes.TrimRight(b, "}")
+			buf.Write(b)
 		}
-		b = bytes.TrimLeft(b, "{")
-		b = bytes.TrimRight(b, "}")
-		buf.Write(b)
 	}
 
-	buf.WriteRune('}')
-	buf.WriteRune('\n')
+	buf.WriteString("}\n")
 
 	_, err = io.Copy(o.w, buf)
 	if err != nil {
@@ -213,10 +211,13 @@ const (
 	// JSONOutputFlagSeverity prints the string value of severity into severity field.
 	JSONOutputFlagSeverity JSONOutputFlag = 1 << iota
 
-	// JSONOutputFlagTime prints the time in local time zone into time field.
+	// JSONOutputFlagTime prints the time in the given time zone into time field.
 	JSONOutputFlagTime
 
-	// JSONOutputFlagUTC uses UTC rather than the local time zone if JSONOutputFlagTime is set.
+	// JSONOutputFlagLocalTZ uses the local time zone rather than the given time zone if JSONOutputFlagTime is set.
+	JSONOutputFlagLocalTZ
+
+	// JSONOutputFlagUTC uses UTC rather than the given or local time zone if JSONOutputFlagTime is set.
 	JSONOutputFlagUTC
 
 	// JSONOutputFlagTimestamp prints the unix timestamp into timestamp field.
@@ -257,6 +258,6 @@ const (
 	JSONOutputFlagFields
 
 	// JSONOutputFlagDefault holds predefined default flags.
-	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLongFunc |
-		JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
+	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLocalTZ |
+		JSONOutputFlagLongFunc | JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
 )
