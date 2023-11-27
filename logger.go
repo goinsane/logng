@@ -302,7 +302,7 @@ func (l *Logger) SetVerbose(verbose Verbose) *Logger {
 }
 
 // SetPrintSeverity sets the underlying Logger's severity level which is using with Print methods.
-// If printSeverity is invalid or, less or equal than SeverityFatal; it sets SeverityInfo.
+// If printSeverity is invalid or, less or equal to SeverityFatal; it sets SeverityInfo.
 // It returns the underlying Logger.
 // By default, SeverityInfo.
 func (l *Logger) SetPrintSeverity(printSeverity Severity) *Logger {
