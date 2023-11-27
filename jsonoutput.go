@@ -63,7 +63,7 @@ func (o *JSONOutput) Log(log *Log) {
 
 	if o.flags&JSONOutputFlagTime != 0 {
 		tm := log.Time
-		if o.flags&JSONOutputFlagLocal != 0 {
+		if o.flags&JSONOutputFlagLocalTZ != 0 {
 			tm = tm.Local()
 		}
 		if o.flags&JSONOutputFlagUTC != 0 {
@@ -213,8 +213,8 @@ const (
 	// JSONOutputFlagTime prints the time in the given time zone into time field.
 	JSONOutputFlagTime
 
-	// JSONOutputFlagLocal uses the local time zone rather than the given time zone if JSONOutputFlagTime is set.
-	JSONOutputFlagLocal
+	// JSONOutputFlagLocalTZ uses the local time zone rather than the given time zone if JSONOutputFlagTime is set.
+	JSONOutputFlagLocalTZ
 
 	// JSONOutputFlagUTC uses UTC rather than the given or local time zone if JSONOutputFlagTime is set.
 	JSONOutputFlagUTC
