@@ -126,20 +126,6 @@ func (o *JSONOutput) Log(log *Log) {
 		data.StackTrace = &x
 	}
 
-	fieldsKvs := make([]string, 0, 2*len(log.Fields))
-	if o.flags&JSONOutputFlagFields != 0 {
-		fieldsMap := make(map[string]string, len(log.Fields))
-		for idx, field := range log.Fields {
-			key := fmt.Sprintf("_%s", field.Key)
-			if _, ok := fieldsMap[key]; ok {
-				key = fmt.Sprintf("%d_%s", idx, field.Key)
-			}
-			val := fmt.Sprintf("%v", field.Value)
-			fieldsMap[key] = val
-			fieldsKvs = append(fieldsKvs, key, val)
-		}
-	}
-
 	bufBytes, err := json.Marshal(&data)
 	if err != nil {
 		err = fmt.Errorf("unable to marshal data: %w", err)
@@ -147,21 +133,30 @@ func (o *JSONOutput) Log(log *Log) {
 	}
 	buf := bytes.NewBuffer(bytes.TrimRight(bufBytes, "}"))
 
-	for i, j := 0, len(fieldsKvs); i < j; i = i + 2 {
-		buf.WriteRune(',')
-		var b []byte
-		b, err = json.Marshal(map[string]string{fieldsKvs[i]: fieldsKvs[i+1]})
-		if err != nil {
-			err = fmt.Errorf("unable to marshal field: %w", err)
-			return
+	if o.flags&JSONOutputFlagFields != 0 {
+		uniqueKeys := make(map[string]struct{}, len(log.Fields))
+		for idx, field := range log.Fields {
+			var key string
+			if _, ok := uniqueKeys[field.Key]; !ok {
+				uniqueKeys[field.Key] = struct{}{}
+				key = fmt.Sprintf("_%s", field.Key)
+			} else {
+				key = fmt.Sprintf("%d_%s", idx, field.Key)
+			}
+			buf.WriteRune(',')
+			var b []byte
+			b, err = json.Marshal(map[string]interface{}{key: field.Value})
+			if err != nil {
+				err = fmt.Errorf("unable to marshal field: %w", err)
+				return
+			}
+			b = bytes.TrimLeft(b, "{")
+			b = bytes.TrimRight(b, "}")
+			buf.Write(b)
 		}
-		b = bytes.TrimLeft(b, "{")
-		b = bytes.TrimRight(b, "}")
-		buf.Write(b)
 	}
 
-	buf.WriteRune('}')
-	buf.WriteRune('\n')
+	buf.WriteString("}\n")
 
 	_, err = io.Copy(o.w, buf)
 	if err != nil {
