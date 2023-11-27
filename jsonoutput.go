@@ -257,6 +257,6 @@ const (
 	JSONOutputFlagFields
 
 	// JSONOutputFlagDefault holds predefined default flags.
-	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLongFunc |
-		JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
+	JSONOutputFlagDefault = JSONOutputFlagSeverity | JSONOutputFlagTime | JSONOutputFlagLocalTZ |
+		JSONOutputFlagLongFunc | JSONOutputFlagShortFile | JSONOutputFlagStackTraceShortFile | JSONOutputFlagFields
 )
